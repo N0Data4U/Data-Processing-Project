@@ -35,4 +35,4 @@ Next Steps:
   
 ### ChromeDriver Installation
 1. Download the [ChromeDriver]([https://sites.google.com/chromium.org/driver/](https://chromedriver.chromium.org/downloads)) executable compatible with your Chrome browser version.
-2. Place the downloaded executable in a directory that is included in your system's PATH.
+2. Place the downloaded directory in a directory that is included in your system's PATH.
