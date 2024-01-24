@@ -1,0 +1,9 @@
+# This file includes the relevant packages and versions of the project
+
+# Python version
+python_version >= '3.11.5'
+
+
+# Packages
+beautifulsoup4==4.12.2
+requests==2.31.0
