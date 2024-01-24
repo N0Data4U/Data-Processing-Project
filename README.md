@@ -33,4 +33,6 @@ Next Steps:
      5.1) Automatic Prediction: Provide information and get results for prices of a phone with certain characteristics
      5.2) Make it runnable 
   
-   
+### ChromeDriver Installation
+1. Download the [ChromeDriver]([https://sites.google.com/chromium.org/driver/](https://chromedriver.chromium.org/downloads)) executable compatible with your Chrome browser version.
+2. Place the downloaded executable in a directory that is included in your system's PATH.
