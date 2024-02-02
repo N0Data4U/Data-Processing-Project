@@ -40,6 +40,10 @@ Next Steps:
 ### Variables Across Datasets
 | Variable | Data Type | DatArt | Electroworld |CZC|
 |----------|----------|----------|----------|----------|
-| Row 1, Col 1 | Row 1, Col 2 | Row 1, Col 3 | Row 1, Col 4 | Row 1, Col 5 |
-| Row 2, Col 1 | Row 2, Col 2 | Row 2, Col 3 | Row 2, Col 4 | Row 1, Col 5 |
-| Row 3, Col 1 | Row 3, Col 2 | Row 3, Col 3 | Row 3, Col 4 | Row 1, Col 5 |
+| title | string | Yes | Yes | - |
+| online-retailer | string | Yes | $arrow | - |
+| price | int | Yes | Yes | - |
+| rating | float | Yes | Yes | - |
+| number of ratings | int | Yes | Yes |  |
+| - | - | - | - | - |
+
