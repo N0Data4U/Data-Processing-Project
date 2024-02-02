@@ -42,18 +42,18 @@ Next Steps:
 |----------|----------|----------|----------|----------|
 | title | string | ✅ | ✅ | ❌ |
 | online-retailer | string | ✅ | ✅ | ❌ |
-| price | int (CZK) | ✅ | ✅ | ❌ |
+| price | integer (CZK) | ✅ | ✅ | ❌ |
 | rating | float | ✅ | ✅ | ❌ |
 | number of ratings | int | ✅ | ✅ | ❌ |
 | display size | float (inches) | ✅ | ✅ | ❌ |
-| resolution width | int (pixels) | ✅ | ✅ | ❌ |
-| resolution height | int (pixels) | ✅ | ✅ | ❌ |
-| resolution total | int (pixels) | ✅ | ✅ | ❌ |
-| display refresh rate | int (Hertz) | ✅ | ✅ | ❌ |
+| resolution width | integer (pixels) | ✅ | ✅ | ❌ |
+| resolution height | integer (pixels) | ✅ | ✅ | ❌ |
+| resolution total | integer (pixels) | ✅ | ✅ | ❌ |
+| display refresh rate | integer (Hertz) | ✅ | ✅ | ❌ |
 | cutout shape | string | ✅ | ❌ | ❌ |
 | processor manufacturer | string | ✅ | ✅ | ❌ |
 | processor model | string | ✅ | ✅ | ❌ |
-| number of cores | int | ✅ | ✅ | ❌ |
+| number of cores | integer | ✅ | ✅ | ❌ |
 | processor frequency | float (Gigahertz) | ✅ | ❌ | ❌ |
 | SIM card type | string | ✅ | ✅ | ❌ |
 | configuration cards | string | ✅ | ✅ | ❌ |
@@ -61,15 +61,67 @@ Next Steps:
 | operating system | string | ✅ | ✅ | ❌ |
 | system superstructure | string | ✅ | ✅ | ❌ |
 | notification diode | binary | ✅ | ❌ | ❌ |
-| internal memory | int (GB) | ✅ | ✅ | ❌ |
-| RAM | int (GB) | ✅ | ✅ | ❌ |
+| internal memory | integer (GB) | ✅ | ✅ | ❌ |
+| RAM | integer (GB) | ✅ | ✅ | ❌ |
 | memory card slot | binary | ✅ | ✅ | ❌ |
-| maximum memory card size | int | ✅ | ❌ | ❌ |
+| maximum memory card size | integer | ✅ | ❌ | ❌ |
 | 4G/LTE | binary | ✅ | ✅ | ❌ |
 | Galileo | binary | ✅ | ❌ | ❌ |
 | Beidou | binary | ✅ | ❌ | ❌ |
-| Beidou | binary | ✅ | ❌ | ❌ |
-| Beidou | binary | ✅ | ❌ | ❌ |
-| Beidou | binary | ✅ | ❌ | ❌ |
-| Beidou | binary | ✅ | ❌ | ❌ |
-| Beidou | binary | ✅ | ❌ | ❌ |
+| GPS | binary | ✅ | ✅ | ❌ |
+| A-GPS | binary | ✅ | ❌ | ❌ |
+| infrared | binary | ✅ | ❌ | ❌ |
+| Wi-Fi | binary | ✅ | ✅ | ❌ |
+| 5G | binary | ✅ | ✅ | ❌ |
+| NFC | binary | ✅ | ✅ | ❌ |
+| GLONASS | binary | ✅ | ❌ | ❌ |
+| Bluetooth | binary | ✅ | ✅ | ❌ |
+| number of rear camera lenses | integer | ✅ | ✅ | ❌ |
+| number of front camera lenses | integer | ✅ | ✅ | ❌ |
+| rear cam resolution | float (pixels) | ✅ | ✅ | ❌ |
+| front cam resolution | float (pixels) | ✅ | ✅ | ❌ |
+| Bokeh effect | binary | ✅ | ❌ | ❌ |
+| auto focus | binary | ✅ | ❌ | ❌ |
+| thermal camera | binary | ✅ | ❌ | ❌ |
+| wide angle lens | binary | ✅ | ❌ | ❌ |
+| macro mode | binary | ✅ | ❌ | ❌ |
+| night mode | binary | ✅ | ❌ | ❌ |
+| optical zoom | binary | ✅ | ❌ | ❌ |
+| telephoto | binary | ✅ | ❌ | ❌ |
+| hybrid zoom | binary | ✅ | ❌ | ❌ |
+| flash diode | binary | ✅ | ❌ | ❌ |
+| battery type | string | ✅ | ❌ | ❌ |
+| battery capacity | integer (mAh) | ✅ | ❌ | ❌ |
+| removable battery | binary | ✅ | ❌ | ❌ |
+| fast charging | binary | ✅ | ✅ | ❌ |
+| wireless charging | binary | ✅ | ✅ | ❌ |
+| reverse wireless charging | binary | ✅ | ❌ | ❌ |
+| charging power | int (Watt) | ✅ | ❌ | ❌ |
+| without fingerprint reader | binary | ✅ | ❌ | ❌ |
+| body fingerprint reader | binary | ✅ | ✅ | ❌ |
+| face unlock | binary | ✅ | ✅ | ❌ |
+| in-display fingerprint reader | binary | ✅ | ✅ | ❌ |
+| connector | string | ✅ | ❌ | ❌ |
+| 3.5mm jack | binary | ✅ | ✅ | ❌ |
+| warranty | int (months) | ✅ | ❌ | ❌ |
+| FM-radio | binary | ✅ | ✅ | ❌ |
+| colour | string | ✅ | ✅ | ❌ |
+| brand | string | ✅ | ✅ | ❌ |
+| width | float (cm) | ✅ | ✅ | ❌ |
+| length | float (cm) | ✅ | ✅ | ❌ |
+| depth | float (cm) | ✅ | ✅ | ❌ |
+| volume | float (cubic cm) | ✅ | ✅ | ❌ |
+| weight | float (grams) | ✅ | ✅ | ❌ |
+| bluetooth version | string | ❌ | ✅ | ❌ |
+| WiFi standard | string | ❌ | ✅ | ❌ |
+| display type | string | ❌ | ✅ | ❌ |
+| resolution label | string | ❌ | ✅ | ❌ |
+| display fineness | integer (PPI) | ❌ | ✅ | ❌ |
+| smart | binary | ❌ | ✅ | ❌ |
+| water resistant | binary | ❌ | ✅ | ❌ |
+| os brand | string | ❌ | ✅ | ❌ |
+| dual SIM support | binary | ❌ | ✅ | ❌ |
+| built-in flash | binary | ❌ | ✅ | ❌ |
+| flash type | string | ❌ | ✅ | ❌ |
+| front cam | binary | ❌ | ✅ | ❌ |
+| wireless charging performance | integer (Watt) | ❌ | ✅ | ❌ |
