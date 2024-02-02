@@ -40,10 +40,36 @@ Next Steps:
 ### Variables Across Datasets
 | Variable | Data Type | DatArt | Electroworld |CZC|
 |----------|----------|----------|----------|----------|
-| title | string | Yes | Yes | - |
-| online-retailer | string | Yes | $arrow | - |
-| price | int | Yes | Yes | - |
-| rating | float | Yes | Yes | - |
-| number of ratings | int | Yes | Yes |  |
-| - | - | - | - | - |
-
+| title | string | ✅ | ✅ | ❌ |
+| online-retailer | string | ✅ | ✅ | ❌ |
+| price | int (CZK) | ✅ | ✅ | ❌ |
+| rating | float | ✅ | ✅ | ❌ |
+| number of ratings | int | ✅ | ✅ | ❌ |
+| display size | float (inches) | ✅ | ✅ | ❌ |
+| resolution width | int (pixels) | ✅ | ✅ | ❌ |
+| resolution height | int (pixels) | ✅ | ✅ | ❌ |
+| resolution total | int (pixels) | ✅ | ✅ | ❌ |
+| display refresh rate | int (Hertz) | ✅ | ✅ | ❌ |
+| cutout shape | string | ✅ | ❌ | ❌ |
+| processor manufacturer | string | ✅ | ✅ | ❌ |
+| processor model | string | ✅ | ✅ | ❌ |
+| number of cores | int | ✅ | ✅ | ❌ |
+| processor frequency | float (Gigahertz) | ✅ | ❌ | ❌ |
+| SIM card type | string | ✅ | ✅ | ❌ |
+| configuration cards | string | ✅ | ✅ | ❌ |
+| degree of protection | string | ✅ | ✅ | ❌ |
+| operating system | string | ✅ | ✅ | ❌ |
+| system superstructure | string | ✅ | ✅ | ❌ |
+| notification diode | binary | ✅ | ❌ | ❌ |
+| internal memory | int (GB) | ✅ | ✅ | ❌ |
+| RAM | int (GB) | ✅ | ✅ | ❌ |
+| memory card slot | binary | ✅ | ✅ | ❌ |
+| maximum memory card size | int | ✅ | ❌ | ❌ |
+| 4G/LTE | binary | ✅ | ✅ | ❌ |
+| Galileo | binary | ✅ | ❌ | ❌ |
+| Beidou | binary | ✅ | ❌ | ❌ |
+| Beidou | binary | ✅ | ❌ | ❌ |
+| Beidou | binary | ✅ | ❌ | ❌ |
+| Beidou | binary | ✅ | ❌ | ❌ |
+| Beidou | binary | ✅ | ❌ | ❌ |
+| Beidou | binary | ✅ | ❌ | ❌ |
