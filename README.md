@@ -50,36 +50,50 @@ Next Steps:
 | resolution height | integer (pixels) | ✅ | ✅ | ❌ |
 | resolution total | integer (pixels) | ✅ | ✅ | ❌ |
 | display refresh rate | integer (Hertz) | ✅ | ✅ | ❌ |
-| cutout shape | string | ✅ | ❌ | ❌ |
 | processor manufacturer | string | ✅ | ✅ | ❌ |
 | processor model | string | ✅ | ✅ | ❌ |
 | number of cores | integer | ✅ | ✅ | ❌ |
-| processor frequency | float (Gigahertz) | ✅ | ❌ | ❌ |
 | SIM card type | string | ✅ | ✅ | ❌ |
 | configuration cards | string | ✅ | ✅ | ❌ |
 | degree of protection | string | ✅ | ✅ | ❌ |
 | operating system | string | ✅ | ✅ | ❌ |
 | system superstructure | string | ✅ | ✅ | ❌ |
-| notification diode | binary | ✅ | ❌ | ❌ |
 | internal memory | integer (GB) | ✅ | ✅ | ❌ |
 | RAM | integer (GB) | ✅ | ✅ | ❌ |
 | memory card slot | binary | ✅ | ✅ | ❌ |
-| maximum memory card size | integer | ✅ | ❌ | ❌ |
 | 4G/LTE | binary | ✅ | ✅ | ❌ |
-| Galileo | binary | ✅ | ❌ | ❌ |
-| Beidou | binary | ✅ | ❌ | ❌ |
 | GPS | binary | ✅ | ✅ | ❌ |
-| A-GPS | binary | ✅ | ❌ | ❌ |
-| infrared | binary | ✅ | ❌ | ❌ |
 | Wi-Fi | binary | ✅ | ✅ | ❌ |
 | 5G | binary | ✅ | ✅ | ❌ |
 | NFC | binary | ✅ | ✅ | ❌ |
-| GLONASS | binary | ✅ | ❌ | ❌ |
 | Bluetooth | binary | ✅ | ✅ | ❌ |
 | number of rear camera lenses | integer | ✅ | ✅ | ❌ |
 | number of front camera lenses | integer | ✅ | ✅ | ❌ |
 | rear cam resolution | float (pixels) | ✅ | ✅ | ❌ |
 | front cam resolution | float (pixels) | ✅ | ✅ | ❌ |
+| fast charging | binary | ✅ | ✅ | ❌ |
+| wireless charging | binary | ✅ | ✅ | ❌ |
+| body fingerprint reader | binary | ✅ | ✅ | ❌ |
+| face unlock | binary | ✅ | ✅ | ❌ |
+| in-display fingerprint reader | binary | ✅ | ✅ | ❌ |
+| 3.5mm jack | binary | ✅ | ✅ | ❌ |
+| FM-radio | binary | ✅ | ✅ | ❌ |
+| colour | string | ✅ | ✅ | ❌ |
+| brand | string | ✅ | ✅ | ❌ |
+| width | float (cm) | ✅ | ✅ | ❌ |
+| length | float (cm) | ✅ | ✅ | ❌ |
+| depth | float (cm) | ✅ | ✅ | ❌ |
+| volume | float (cubic cm) | ✅ | ✅ | ❌ |
+| weight | float (grams) | ✅ | ✅ | ❌ |
+| cutout shape | string | ✅ | ❌ | ❌ |
+| processor frequency | float (Gigahertz) | ✅ | ❌ | ❌ |
+| notification diode | binary | ✅ | ❌ | ❌ |
+| maximum memory card size | integer | ✅ | ❌ | ❌ |
+| Galileo | binary | ✅ | ❌ | ❌ |
+| Beidou | binary | ✅ | ❌ | ❌ |
+| A-GPS | binary | ✅ | ❌ | ❌ |
+| infrared | binary | ✅ | ❌ | ❌ |
+| GLONASS | binary | ✅ | ❌ | ❌ |
 | Bokeh effect | binary | ✅ | ❌ | ❌ |
 | auto focus | binary | ✅ | ❌ | ❌ |
 | thermal camera | binary | ✅ | ❌ | ❌ |
@@ -93,25 +107,11 @@ Next Steps:
 | battery type | string | ✅ | ❌ | ❌ |
 | battery capacity | integer (mAh) | ✅ | ❌ | ❌ |
 | removable battery | binary | ✅ | ❌ | ❌ |
-| fast charging | binary | ✅ | ✅ | ❌ |
-| wireless charging | binary | ✅ | ✅ | ❌ |
 | reverse wireless charging | binary | ✅ | ❌ | ❌ |
 | charging power | int (Watt) | ✅ | ❌ | ❌ |
 | without fingerprint reader | binary | ✅ | ❌ | ❌ |
-| body fingerprint reader | binary | ✅ | ✅ | ❌ |
-| face unlock | binary | ✅ | ✅ | ❌ |
-| in-display fingerprint reader | binary | ✅ | ✅ | ❌ |
 | connector | string | ✅ | ❌ | ❌ |
-| 3.5mm jack | binary | ✅ | ✅ | ❌ |
 | warranty | int (months) | ✅ | ❌ | ❌ |
-| FM-radio | binary | ✅ | ✅ | ❌ |
-| colour | string | ✅ | ✅ | ❌ |
-| brand | string | ✅ | ✅ | ❌ |
-| width | float (cm) | ✅ | ✅ | ❌ |
-| length | float (cm) | ✅ | ✅ | ❌ |
-| depth | float (cm) | ✅ | ✅ | ❌ |
-| volume | float (cubic cm) | ✅ | ✅ | ❌ |
-| weight | float (grams) | ✅ | ✅ | ❌ |
 | bluetooth version | string | ❌ | ✅ | ❌ |
 | WiFi standard | string | ❌ | ✅ | ❌ |
 | display type | string | ❌ | ✅ | ❌ |
