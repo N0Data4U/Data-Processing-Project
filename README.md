@@ -60,24 +60,24 @@ Next Steps:
 | system superstructure | string | ✅ | ✅ | ❌ |
 | internal memory | integer (GB) | ✅ | ✅ | ❌ |
 | RAM | integer (GB) | ✅ | ✅ | ❌ |
-| memory card slot | binary | ✅ | ✅ | ❌ |
-| 4G/LTE | binary | ✅ | ✅ | ❌ |
-| GPS | binary | ✅ | ✅ | ❌ |
-| Wi-Fi | binary | ✅ | ✅ | ❌ |
-| 5G | binary | ✅ | ✅ | ❌ |
-| NFC | binary | ✅ | ✅ | ❌ |
-| Bluetooth | binary | ✅ | ✅ | ❌ |
+| memory card slot | boolean | ✅ | ✅ | ❌ |
+| 4G/LTE | boolean | ✅ | ✅ | ❌ |
+| GPS | boolean | ✅ | ✅ | ❌ |
+| Wi-Fi | boolean | ✅ | ✅ | ❌ |
+| 5G | boolean | ✅ | ✅ | ❌ |
+| NFC | boolean | ✅ | ✅ | ❌ |
+| Bluetooth | boolean | ✅ | ✅ | ❌ |
 | number of rear camera lenses | integer | ✅ | ✅ | ❌ |
 | number of front camera lenses | integer | ✅ | ✅ | ❌ |
 | rear cam resolution | float (pixels) | ✅ | ✅ | ❌ |
 | front cam resolution | float (pixels) | ✅ | ✅ | ❌ |
-| fast charging | binary | ✅ | ✅ | ❌ |
-| wireless charging | binary | ✅ | ✅ | ❌ |
-| body fingerprint reader | binary | ✅ | ✅ | ❌ |
-| face unlock | binary | ✅ | ✅ | ❌ |
-| in-display fingerprint reader | binary | ✅ | ✅ | ❌ |
-| 3.5mm jack | binary | ✅ | ✅ | ❌ |
-| FM-radio | binary | ✅ | ✅ | ❌ |
+| fast charging | boolean | ✅ | ✅ | ❌ |
+| wireless charging | boolean | ✅ | ✅ | ❌ |
+| body fingerprint reader | boolean | ✅ | ✅ | ❌ |
+| face unlock | boolean | ✅ | ✅ | ❌ |
+| in-display fingerprint reader | boolean | ✅ | ✅ | ❌ |
+| 3.5mm jack | boolean | ✅ | ✅ | ❌ |
+| FM-radio | boolean | ✅ | ✅ | ❌ |
 | colour | string | ✅ | ✅ | ❌ |
 | brand | string | ✅ | ✅ | ❌ |
 | width | float (cm) | ✅ | ✅ | ❌ |
@@ -87,29 +87,29 @@ Next Steps:
 | weight | float (grams) | ✅ | ✅ | ❌ |
 | cutout shape | string | ✅ | ❌ | ❌ |
 | processor frequency | float (Gigahertz) | ✅ | ❌ | ❌ |
-| notification diode | binary | ✅ | ❌ | ❌ |
+| notification diode | boolean | ✅ | ❌ | ❌ |
 | maximum memory card size | integer | ✅ | ❌ | ❌ |
-| Galileo | binary | ✅ | ❌ | ❌ |
-| Beidou | binary | ✅ | ❌ | ❌ |
-| A-GPS | binary | ✅ | ❌ | ❌ |
-| infrared | binary | ✅ | ❌ | ❌ |
-| GLONASS | binary | ✅ | ❌ | ❌ |
-| Bokeh effect | binary | ✅ | ❌ | ❌ |
-| auto focus | binary | ✅ | ❌ | ❌ |
-| thermal camera | binary | ✅ | ❌ | ❌ |
-| wide angle lens | binary | ✅ | ❌ | ❌ |
-| macro mode | binary | ✅ | ❌ | ❌ |
-| night mode | binary | ✅ | ❌ | ❌ |
-| optical zoom | binary | ✅ | ❌ | ❌ |
-| telephoto | binary | ✅ | ❌ | ❌ |
-| hybrid zoom | binary | ✅ | ❌ | ❌ |
-| flash diode | binary | ✅ | ❌ | ❌ |
+| Galileo | boolean | ✅ | ❌ | ❌ |
+| Beidou | boolean | ✅ | ❌ | ❌ |
+| A-GPS | boolean | ✅ | ❌ | ❌ |
+| infrared | boolean | ✅ | ❌ | ❌ |
+| GLONASS | boolean | ✅ | ❌ | ❌ |
+| Bokeh effect | boolean | ✅ | ❌ | ❌ |
+| auto focus | boolean | ✅ | ❌ | ❌ |
+| thermal camera | boolean | ✅ | ❌ | ❌ |
+| wide angle lens | boolean | ✅ | ❌ | ❌ |
+| macro mode | boolean | ✅ | ❌ | ❌ |
+| night mode | boolean | ✅ | ❌ | ❌ |
+| optical zoom | boolean | ✅ | ❌ | ❌ |
+| telephoto | boolean | ✅ | ❌ | ❌ |
+| hybrid zoom | boolean | ✅ | ❌ | ❌ |
+| flash diode | boolean | ✅ | ❌ | ❌ |
 | battery type | string | ✅ | ❌ | ❌ |
 | battery capacity | integer (mAh) | ✅ | ❌ | ❌ |
-| removable battery | binary | ✅ | ❌ | ❌ |
-| reverse wireless charging | binary | ✅ | ❌ | ❌ |
+| removable battery | boolean | ✅ | ❌ | ❌ |
+| reverse wireless charging | boolean | ✅ | ❌ | ❌ |
 | charging power | int (Watt) | ✅ | ❌ | ❌ |
-| without fingerprint reader | binary | ✅ | ❌ | ❌ |
+| without fingerprint reader | boolean | ✅ | ❌ | ❌ |
 | connector | string | ✅ | ❌ | ❌ |
 | warranty | int (months) | ✅ | ❌ | ❌ |
 | bluetooth version | string | ❌ | ✅ | ❌ |
@@ -117,11 +117,11 @@ Next Steps:
 | display type | string | ❌ | ✅ | ❌ |
 | resolution label | string | ❌ | ✅ | ❌ |
 | display fineness | integer (PPI) | ❌ | ✅ | ❌ |
-| smart | binary | ❌ | ✅ | ❌ |
-| water resistant | binary | ❌ | ✅ | ❌ |
+| smart | boolean | ❌ | ✅ | ❌ |
+| water resistant | boolean | ❌ | ✅ | ❌ |
 | os brand | string | ❌ | ✅ | ❌ |
-| dual SIM support | binary | ❌ | ✅ | ❌ |
-| built-in flash | binary | ❌ | ✅ | ❌ |
+| dual SIM support | boolean | ❌ | ✅ | ❌ |
+| built-in flash | boolean | ❌ | ✅ | ❌ |
 | flash type | string | ❌ | ✅ | ❌ |
-| front cam | binary | ❌ | ✅ | ❌ |
+| front cam | boolean | ❌ | ✅ | ❌ |
 | wireless charging performance | integer (Watt) | ❌ | ✅ | ❌ |
