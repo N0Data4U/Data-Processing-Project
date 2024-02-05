@@ -47,6 +47,7 @@ Next Steps:
 | number of ratings | int | ✅ | ✅ | ❌ |
 | display size | float (inches) | ✅ | ✅ | ❌ |
 | resolution width | integer (pixels) | ✅ | ✅ | ❌ |
+| connector | string | ✅ | ✅ | ❌ |
 | resolution height | integer (pixels) | ✅ | ✅ | ❌ |
 | resolution total | integer (pixels) | ✅ | ✅ | ❌ |
 | display refresh rate | integer (Hertz) | ✅ | ✅ | ❌ |
@@ -57,9 +58,10 @@ Next Steps:
 | configuration cards | string | ✅ | ✅ | ❌ |
 | degree of protection | string | ✅ | ✅ | ❌ |
 | operating system | string | ✅ | ✅ | ❌ |
-| system superstructure | string | ✅ | ✅ | ❌ |
 | internal memory | integer (GB) | ✅ | ✅ | ❌ |
 | RAM | integer (GB) | ✅ | ✅ | ❌ |
+| charging power | int (Watt) | ✅ | ✅ | ❌ |
+| battery capacity | integer (mAh) | ✅ | ✅ | ❌ |
 | memory card slot | boolean | ✅ | ✅ | ❌ |
 | 4G/LTE | boolean | ✅ | ✅ | ❌ |
 | GPS | boolean | ✅ | ✅ | ❌ |
@@ -87,6 +89,7 @@ Next Steps:
 | weight | float (grams) | ✅ | ✅ | ❌ |
 | cutout shape | string | ✅ | ❌ | ❌ |
 | processor frequency | float (Gigahertz) | ✅ | ❌ | ❌ |
+| system superstructure | string | ✅ | ❌ | ❌ |
 | notification diode | boolean | ✅ | ❌ | ❌ |
 | maximum memory card size | integer | ✅ | ❌ | ❌ |
 | Galileo | boolean | ✅ | ❌ | ❌ |
@@ -105,12 +108,9 @@ Next Steps:
 | hybrid zoom | boolean | ✅ | ❌ | ❌ |
 | flash diode | boolean | ✅ | ❌ | ❌ |
 | battery type | string | ✅ | ❌ | ❌ |
-| battery capacity | integer (mAh) | ✅ | ❌ | ❌ |
 | removable battery | boolean | ✅ | ❌ | ❌ |
 | reverse wireless charging | boolean | ✅ | ❌ | ❌ |
-| charging power | int (Watt) | ✅ | ❌ | ❌ |
 | without fingerprint reader | boolean | ✅ | ❌ | ❌ |
-| connector | string | ✅ | ❌ | ❌ |
 | warranty | int (months) | ✅ | ❌ | ❌ |
 | bluetooth version | string | ❌ | ✅ | ❌ |
 | WiFi standard | string | ❌ | ✅ | ❌ |
