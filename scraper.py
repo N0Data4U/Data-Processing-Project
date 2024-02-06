@@ -1,6 +1,7 @@
 # This file contains all necessary functions for scraping mobile phone data from the three used data sources: DatArt, CZC and Electroworld
 
 # Loading packages
+from logging import config
 import os;
 import requests, re;
 from bs4 import BeautifulSoup;
@@ -76,19 +77,36 @@ def get_product_urls_CZC(basic_url: str, category_urls: list):
     return product_urls
 
 # 1.3 Electroworld - Function for sraping all product URLs of mobile phones from the mobile phone category page
-def get_product_urls_Electroworld(basic_url, category_urls,):
+def get_product_urls_Electroworld(basic_url, category_url, number_of_pages):
     
     # Check data types of arguments
     if not isinstance(basic_url, str):
         raise TypeError("Basic URL must be a string.")
     
-    if not isinstance(category_urls, list):
-        raise TypeError("Category URLs must be a list.")
+    if not isinstance(category_url, str):
+        raise TypeError("Category URL must be a string.")
+
+    if not isinstance(number_of_pages, int):
+        raise TypeError("Number of pages must be of type integer.")
     
+    # Instead all pages of the category url have to be individually scraped
+    page_urls = [category_url] # category_url is added as it is the first page with products
+
+    # Generating URL for all pages of the category website
+
+    # Create list of pages 
+    pages = list(range(2, number_of_pages, 1)) 
+
+    # Iterate over the pages and construct URLs for every page of the category website
+    for page in pages:
+        url_with_page = f"{category_url}?page={page}"
+        page_urls.append(url_with_page)
+
+    # Placeholder for product URLS
     product_urls = []
 
     # Scrape product URL's across all product pages
-    for page_num, url in enumerate(category_urls, start=1):
+    for page_num, url in enumerate(page_urls, start=1):
 
         response = requests.get(url)
         
@@ -108,10 +126,6 @@ def get_product_urls_Electroworld(basic_url, category_urls,):
     # Print the number of products found with a current timestamp
     print(f"{len(product_urls)} products found.({current_time})")
     return product_urls
-
-
-
-
 
 # 2. Functions for scraping product information characteristics for a given product (URL) from DatArt
 # For some variables (product colour, number of cores) an if-/elif-else clause was built to translate the czech labels into english labels
@@ -265,9 +279,9 @@ def get_product_cutout_shape_DatArt(soup_product_page):
         if cutout_shape == "bez výřezu":
             cutout_shape = "without cut-out"
         if cutout_shape not in ["drop", "rectangle", "bullet hole", "without cut-out"]:
-            cutout_shape = "Other cutout-shape"
+            cutout_shape = "other"
     else:
-        cutout_shape = None
+        cutout_shape = "other"
     return cutout_shape
 
 # Function to return the processor manufacturer for a given product (page) as a string
@@ -278,7 +292,7 @@ def get_product_processor_manufacturer_DatArt(soup_product_page):
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Výrobce procesoru") + td'):
         processor_manufacturer = str(soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Výrobce procesoru") + td').get_text())
     else:
-        processor_manufacturer = None
+        processor_manufacturer = "other"
     return processor_manufacturer
 
 # Function to return the processor model for a given product (page) as a string
@@ -288,7 +302,7 @@ def get_product_processor_model_DatArt(soup_product_page):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Model procesoru") + td'):
         processor_model = str(soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Model procesoru") + td').get_text())
-    else: processor_model = None
+    else: processor_model = "other"
     return processor_model
 
 # Function to return the number of cores for a given product (page) as a string
@@ -299,16 +313,18 @@ def get_product_no_cores_DatArt(soup_product_page):
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Počet jader") + td'):
         no_cores = no_cores = str(soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Počet jader") + td').get_text())
         # Changing czech to english labelling. If there would be a new label, "Other core" will be printed.
+        if no_cores == "desetijádrový":
+            no_cores = 10
         if no_cores == "osmijádrový":
             no_cores = 8
         if no_cores == "šestijádrový":
             no_cores = 6
         if no_cores == "čtyřjádrový":
             no_cores = 4
-        if no_cores not in [8, 6, 4]:
-            no_cores = "Other core"
+        if no_cores not in [10, 8, 6, 4]:
+            no_cores = "other"
     else: 
-        no_cores = None
+        no_cores = 0
     return no_cores
 
 # Function to return the processor frequency (in GHZ) for a given product (page) as a float number
@@ -330,8 +346,12 @@ def get_product_SIM_card_type_DatArt(soup_product_page):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Typ Sim karty") + td'):
         sim_card_type = str(soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Typ Sim karty") + td').get_text())
+        if sim_card_type == "2× nano SIM, nebo 1× nano SIM + eSIM":
+            sim_card_type = "nano SIM + eSIM"
+        if sim_card_type == "mini SIM Standardní":
+            sim_card_type = "mini SIM Standard"
     else:
-        sim_card_type = None
+        sim_card_type = "other"
     return sim_card_type
 
 # Function to return the configuration cards for a given product (page) as a string
@@ -341,8 +361,24 @@ def get_product_config_cards_DatArt(soup_product_page):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Konfigurace karet") + td'):
         configuration_cards = str(soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Konfigurace karet") + td').get_text())
+        if configuration_cards == "Dual SIM (2× SIM)":
+            configuration_cards = "Dual SIM (2x SIM)"
+        if configuration_cards == "Dual SIM (2× SIM), nebo Single SIM + eSIM":
+            configuration_cards = "Dual SIM (2x SIM), or Single SIM + eSIM"
+        if configuration_cards == "Dual SIM + paměťová karta (2× SIM + pam. karta)":
+            configuration_cards = "Dual SIM + Memory Card (2x SIM + Memory Card)"
+        if configuration_cards == "Hybridní slot (2× SIM, nebo 1× SIM + pam. karta)":
+            configuration_cards = "Hybrid slot (2x SIM or 1x SIM + memory card)"
+        if configuration_cards == "Hybridní slot + eSIM":
+            configuration_cards = "Hybrid slot + eSIM"
+        if configuration_cards == "Single SIM + paměťová karta":
+            configuration_cards = "Single SIM + memory card"
+        if configuration_cards == "Single SIM + eSIM + paměťová karta":
+            configuration_cards = "Single SIM + eSIM + Memory Card"
+        if configuration_cards == "Single SIM (1× SIM)":
+            configuration_cards = "Single SIM (1x SIM)"
     else:
-        configuration_cards = None
+        configuration_cards = "other"
     return configuration_cards
 
 # Function to return the degree of protection for a given product (page) as a string
@@ -352,9 +388,13 @@ def get_product_degree_of_protection_DatArt(soup_product_page):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Stupeň krytí") + td'):
         degree_of_protection = str(soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Stupeň krytí") + td').get_text())
+        if degree_of_protection == "nemá":
+            degree_of_protection = "No protection"
+        if degree_of_protection == "IP65/68":
+            degree_of_protection = "IP68"
     else: 
-        degree_of_protection = None
-    return degree_of_protection#
+        degree_of_protection = "No protection"
+    return degree_of_protection
 
 # Function to return the operating system for a given product (page) as a string
 def get_product_OS_DatArt(soup_product_page):
@@ -363,8 +403,12 @@ def get_product_OS_DatArt(soup_product_page):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Operační systém") + td'):
         product_OS = str(soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Operační systém") + td').get_text())
+        if product_OS == "bez operačního systému":
+            product_OS = "Without operating system"
+        if product_OS == "vlastní OS":
+            product_OS = "Custom operating system"
     else: 
-        product_OS = None
+        product_OS = "other"
     return product_OS
 
 # Function to return the system superstructure for a given product (page) as a string
@@ -379,7 +423,7 @@ def get_product_system_superstructure_DatArt(soup_product_page):
         if system_superstructure == "čistý Android":
             system_superstructure = "pure Android"
     else: 
-        system_superstructure = None
+        system_superstructure = "other"
     return system_superstructure
 
 # Function to return if the product has a notification diode for a given product (page) as a 1/0 variable
@@ -394,8 +438,8 @@ def get_product_notification_diode_DatArt(soup_product_page):
         if notification_diode == "Ne":
             notification_diode = 0
     else: 
-        notification_diode = None
-    return notification_diode
+        notification_diode = 0
+    return bool(notification_diode)
 
 # Function to return the internal memory (in GB) for a given product (page) as an integer
 def get_product_int_memory_DatArt(soup_product_page):
@@ -436,13 +480,11 @@ def get_product_memory_card_slot_DatArt(soup_product_page):
         else: 
             mem_card_slot = 1
     else: 
-        mem_card_slot = None
-    return mem_card_slot
-
-
+        mem_card_slot = 0
+    return bool(mem_card_slot)
 
 # Function to return the maximum memory card size (in TB) for a given product (page) as an integer
-def get_product_max_memory_card_size_DatArt(soup_product_page):
+def get_product_maximum_memory_card_size_DatArt(soup_product_page):
      # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
@@ -454,7 +496,7 @@ def get_product_max_memory_card_size_DatArt(soup_product_page):
         except Exception:
             max_memory_card_size = str(soup_max_memory_card_size)
             if max_memory_card_size == "nepodporuje paměťové karty":
-                max_memory_card_size = "Doesn't support memory cards"
+                max_memory_card_size = None
     else:
         max_memory_card_size = None
     return max_memory_card_size
@@ -466,6 +508,11 @@ def get_product_wireless_tech_list_DatArt(soup_product_page):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Bezdrátové technologie") + td'):
         wireless_tech_list = str(soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Bezdrátové technologie") + td').get_text()).split(', ')
+        if "Infraport" in wireless_tech_list:
+            # Find index to replace
+            index = wireless_tech_list.index("Infraport")
+            # Replace values
+            wireless_tech_list[index] = "infrared"
     else:
         wireless_tech_list = None
     return wireless_tech_list
@@ -478,7 +525,7 @@ def get_product_no_rear_cam_lenses_DatArt(soup_product_page):
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Počet objektivů zadního fotoaparátu") + td'):
         no_rear_cam_lenses = int(soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Počet objektivů zadního fotoaparátu") + td').get_text())
     else:
-        no_rear_cam_lenses = None
+        no_rear_cam_lenses = 0
     return no_rear_cam_lenses
 
 # Function to return the number of front lenses for a given product (page) as an integer
@@ -489,7 +536,7 @@ def get_product_no_front_cam_lenses_DatArt(soup_product_page):
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Počet objektivů předního fotoaparátu") + td'):
         no_front_cam_lenses = int(soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Počet objektivů předního fotoaparátu") + td').get_text())
     else:
-        no_front_cam_lenses = None
+        no_front_cam_lenses = 0
     return no_front_cam_lenses
 
 # Function to return the rear camera resolution (in Megapixels) for a given product (page) as a float number
@@ -557,6 +604,10 @@ def get_product_camera_features_DatArt(soup_product_page):
             index = camera_feature_list.index("optický zoom")
             # Replace values
             camera_feature_list[index] = "optical zoom"
+        if "přisvětlovací dioda" in camera_feature_list:
+            index = camera_feature_list.index("přisvětlovací dioda")
+            # Replace values
+            camera_feature_list[index] = "LED flash"
         if "macro režim" in camera_feature_list:
             # Find index to replace
             index = camera_feature_list.index("macro režim")
@@ -567,8 +618,18 @@ def get_product_camera_features_DatArt(soup_product_page):
             index = camera_feature_list.index("teleobjektiv")
             # Replace values
             camera_feature_list[index] = "telephoto"  
-        if camera_feature_list and all(element not in camera_feature_list for element in ["wide angle lens", "night mode", "auto focus", "flash diode", "Bokeh effect", "optical zoom", "macro mode", "telephoto"]):
-            camera_feature_list = "Other camera feature(s)"
+        if "hybridní zoom" in camera_feature_list:
+            # Find index to replace
+            index = camera_feature_list.index("hybridní zoom")
+            # Replace values
+            camera_feature_list[index] = "hybrid zoom" 
+        if "termokamera" in camera_feature_list:
+            # Find index to replace
+            index = camera_feature_list.index("termokamera")
+            # Replace values
+            camera_feature_list[index] = "thermal camera"   
+        if camera_feature_list and all(element not in camera_feature_list for element in ["wide angle lens", "night mode", "auto focus", "flash diode", "LED flash", "Bokeh effect", "optical zoom", "macro mode", "telephoto", "hybrid zoom", "thermal camera"]):
+            camera_feature_list = ["Other camera feature(s)"]
     else:
         camera_feature_list = None
     return camera_feature_list
@@ -581,9 +642,8 @@ def get_product_battery_type_DatArt(soup_product_page):
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Typ akumulátoru") + td'):
         battery_type = str(soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Typ akumulátoru") + td').get_text())
     else: 
-        battery_type = None
+        battery_type = "other"
     return battery_type
-
 
 # Function to return the battery capacity (in mAh) for a given product (page) as an integer
 def get_product_battery_capacity_DatArt(soup_product_page):
@@ -625,8 +685,12 @@ def get_product_battery_features_DatArt(soup_product_page):
             index = battery_feature_list.index("reverzní bezdrátové nabíjení")
             # Replace values
             battery_feature_list[index] = "reverse wireless charging"
+        if "reverzní kabelové nabíjení" in battery_feature_list:
+            index = battery_feature_list.index("reverzní kabelové nabíjení")
+            # Replace values
+            battery_feature_list[index] = "reverse wireless charging"
         if battery_feature_list and all(element not in battery_feature_list for element in ["fast charging", "wireless charging", "removable battery", "reverse wireless charging"]):
-            battery_feature_list = "Other battery feature(s)"
+            battery_feature_list = ["Other battery feature(s)"]
     else:
         battery_feature_list = None
     return battery_feature_list
@@ -666,8 +730,12 @@ def get_product_security_DatArt(soup_product_page):
             index = security_list.index("odemykání obličejem")
             # Replace values
             security_list[index] = "face unlock"
-        if security_list and all(element not in security_list for element in ["body fingerprint reader", "in-display fingerprint reader", "face unlock"]):
-            security_list = "Other security option(s)"
+        if "bez čtečky otisku prstů" in security_list:
+            index = security_list.index("bez čtečky otisku prstů")
+            # Replace values
+            security_list[index] = "without fingerprint reader"
+        if security_list and all(element not in security_list for element in ["body fingerprint reader", "in-display fingerprint reader", "face unlock", "without fingerprint reader"]):
+            security_list = ["Other security option(s)"]
     else:
         security_list = None
     return security_list
@@ -680,7 +748,7 @@ def get_product_connector_DatArt(soup_product_page):
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Konektor") + td'):
         connector = str(soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Konektor") + td').get_text())
     else:
-        connector = None
+        connector = "other"
     return connector
 
 
@@ -696,8 +764,8 @@ def get_product_3_5mm_jack_DatArt(soup_product_page):
         if jack_35mm == "Ne":
             jack_35mm = 0
     else: 
-        jack_35mm = None
-    return jack_35mm
+        jack_35mm = 0
+    return bool(jack_35mm)
 
 # Function to return the warranty (in months) for a given product (page) as an integer
 def get_product_warranty_DatArt(soup_product_page):
@@ -717,14 +785,14 @@ def get_product_fm_radio_DatArt(soup_product_page):
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("FM rádio") + td'):
-        jack_35mm = str(soup_product_page.select_one('.table-borderless tbody th:-soup-contains("FM rádio") + td').get_text())
-        if jack_35mm == "Ano":
-            jack_35mm = 1
-        if jack_35mm == "Ne":
-            jack_35mm = 0
+        fm_radio = str(soup_product_page.select_one('.table-borderless tbody th:-soup-contains("FM rádio") + td').get_text())
+        if fm_radio == "Ano":
+            fm_radio = 1
+        if fm_radio == "Ne":
+            fm_radio = 0
     else: 
-        jack_35mm = None
-    return jack_35mm
+        fm_radio = 0
+    return bool(fm_radio)
 
 # Function to return the colour for a given product (page) as a string
 def get_product_colour_DatArt(soup_product_page):
@@ -752,7 +820,7 @@ def get_product_colour_DatArt(soup_product_page):
             colour = "purple"
         if colour == "béžová":
             colour = "beige"
-        if colour == "stříbrná ":
+        if colour == "stříbrná":
             colour = "silver"
         if colour == "zlatá":
             colour = "gold"
@@ -790,9 +858,16 @@ def get_product_width_DatArt(soup_product_page):
      # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
-    if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Šířka výrobku") + td'):
-        soup_product_width = soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Šířka výrobku") + td').get_text()
-        product_width = float(re.search(r'(\d+\.\d+)', soup_product_width).group(1))
+    # Locating the table with product dimensions
+    if soup_product_page.select_one('.table-borderless tr th:-soup-contains("Rozměry výrobku")'):
+        if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Šířka výrobku") + td'):
+            soup_product_width = soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Šířka výrobku") + td').get_text()
+            product_width = float(re.search(r'(\d+\.\d+)', soup_product_width).group(1))
+            # For some products the commata is shifted by one digit 
+            if product_width > 20:
+                product_width = product_width/10
+        else:
+            product_width = None
     else:
         product_width = None
     return product_width
@@ -802,9 +877,13 @@ def get_product_length_DatArt(soup_product_page):
      # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
-    if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Výška výrobku") + td'):
-        soup_product_length = soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Výška výrobku") + td').get_text()
-        product_length = float(re.search(r'(\d+\.\d+)', soup_product_length).group(1))
+    # Locating the table with product dimensions
+    if soup_product_page.select_one('.table-borderless tr th:-soup-contains("Rozměry výrobku")'):
+        if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Výška výrobku") + td'):
+            soup_product_length = soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Výška výrobku") + td').get_text()
+            product_length = float(re.search(r'(\d+\.\d+)', soup_product_length).group(1))
+        else:
+            product_length = None
     else:
         product_length = None
     return product_length
@@ -814,9 +893,13 @@ def get_product_depth_DatArt(soup_product_page):
      # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
-    if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Hloubka výrobku") + td'):
-        soup_product_depth = soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Hloubka výrobku") + td').get_text()
-        product_depth = float(re.search(r'(\d+\.\d+)', soup_product_depth).group(1))
+    # Locating the table with product dimensions
+    if soup_product_page.select_one('.table-borderless tr th:-soup-contains("Rozměry výrobku")'):
+        if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Hloubka výrobku") + td'):
+            soup_product_depth = soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Hloubka výrobku") + td').get_text()
+            product_depth = float(re.search(r'(\d+\.\d+)', soup_product_depth).group(1))
+        else: 
+            product_depth = None
     else: 
         product_depth = None
     return product_depth
@@ -826,21 +909,33 @@ def get_product_volume_DatArt(soup_product_page):
      # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
-    if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Šířka výrobku") + td'):
-        soup_product_width = soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Šířka výrobku") + td').get_text()
-        product_width = float(re.search(r'(\d+\.\d+)', soup_product_width).group(1))
-    else:
+    # Locating the table with product dimensions
+    if soup_product_page.select_one('.table-borderless tr th:-soup-contains("Rozměry výrobku")'):
+        if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Šířka výrobku") + td'):
+            soup_product_width = soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Šířka výrobku") + td').get_text()
+            product_width = float(re.search(r'(\d+\.\d+)', soup_product_width).group(1))
+        else:
+            product_width = None
+    else: 
         product_width = None
-    if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Hloubka výrobku") + td'):
-        soup_product_depth = soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Hloubka výrobku") + td').get_text()
-        product_depth = float(re.search(r'(\d+\.\d+)', soup_product_depth).group(1))
-    else:
-        product_depth = None
-    if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Výška výrobku") + td'):
-        soup_product_length = soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Výška výrobku") + td').get_text()
-        product_length = float(re.search(r'(\d+\.\d+)', soup_product_length).group(1))
-    else:
-        product_length = None
+    # Locating the table with product dimensions
+    if soup_product_page.select_one('.table-borderless tr th:-soup-contains("Rozměry výrobku")'):
+        if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Hloubka výrobku") + td'):
+            soup_product_depth = soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Hloubka výrobku") + td').get_text()
+            product_depth = float(re.search(r'(\d+\.\d+)', soup_product_depth).group(1))
+        else:
+            product_depth = None
+    else: 
+        product_depth
+    # Locating the table with product dimensions
+    if soup_product_page.select_one('.table-borderless tr th:-soup-contains("Rozměry výrobku")'):
+        if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Výška výrobku") + td'):
+            soup_product_length = soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Výška výrobku") + td').get_text()
+            product_length = float(re.search(r'(\d+\.\d+)', soup_product_length).group(1))
+        else:
+            product_length = None
+    else: 
+        product_length
     if product_width*product_depth*product_length:
         volume = product_width*product_depth*product_length
     else:
@@ -852,14 +947,104 @@ def get_product_weight_DatArt(soup_product_page):
     # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
-    if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Hmotnost výrobku") + td'):
-        soup_product_weight = soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Hmotnost výrobku") + td').get_text()
-        product_weight = float(re.search(r'(\d+\.\d+)', soup_product_weight).group(1))
-        # Multiplication to get the weight in grams
-        product_weight_g = product_weight*1000
-    else:
+    # Locating the table with product dimensions
+    if soup_product_page.select_one('.table-borderless tr th:-soup-contains("Rozměry výrobku")'):
+        if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Hmotnost výrobku") + td'):
+            soup_product_weight = soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Hmotnost výrobku") + td').get_text()
+            product_weight = float(re.search(r'(\d+\.\d+)', soup_product_weight).group(1))
+            # Multiplication to get the weight in grams
+            product_weight_g = product_weight*1000
+        else:
+            product_weight_g = None
+    else: 
         product_weight_g = None
     return product_weight_g
+
+
+# Function to scrape all product information characteristics (for all URLs) from DatArt
+def get_product_info_DatArt(product_url_list):
+
+    # Check type of argument
+    if not isinstance(product_url_list, list):
+        raise TypeError(f"Input must be a list. Your input has the type: {type(product_url_list)}.")
+
+    products_Data =[]
+    for product_number, product_url in enumerate(product_url_list, start = 1):
+
+        # Getting BeautifulSoup object of product (URL)
+        page = requests.get(product_url)
+        soup = BeautifulSoup(page.text, 'html.parser')
+
+        # Placeholder for product characteristics
+        product_entry_DatArt = {} 
+        product_entry_DatArt["ID"] = product_number
+        product_entry_DatArt["online-retailer"] = "DatArt"
+        product_entry_DatArt['title'] = get_product_title_DatArt(soup)
+        product_entry_DatArt['price'] = get_product_price_DatArt(soup)
+        product_entry_DatArt['rating'] = get_product_rating_DatArt(soup)
+        product_entry_DatArt['number of ratings'] = get_product_no_ratings_DatArt(soup)
+        product_entry_DatArt['display size'] = get_product_display_size_DatArt(soup)
+        product_entry_DatArt['resolution width'] = get_product_resolution_w_DatArt(soup)
+        product_entry_DatArt['resolution height'] = get_product_resolution_h_DatArt(soup)
+        product_entry_DatArt['resolution total'] = get_product_resolution_tot_DatArt(soup)
+        product_entry_DatArt['display refresh rate'] = get_product_display_refresh_rate_DatArt(soup)
+        product_entry_DatArt['cutout shape'] = get_product_cutout_shape_DatArt(soup)
+        product_entry_DatArt['processor manufacturer'] = get_product_processor_manufacturer_DatArt(soup)
+        product_entry_DatArt['processor model'] = get_product_processor_model_DatArt(soup)
+        product_entry_DatArt['number of cores'] = get_product_no_cores_DatArt(soup)
+        product_entry_DatArt['processor frequency'] = get_product_processor_freq_DatArt(soup)
+        product_entry_DatArt['SIM card type'] = get_product_SIM_card_type_DatArt(soup)
+        product_entry_DatArt['configuration cards'] = get_product_config_cards_DatArt(soup)
+        product_entry_DatArt['degree of protection'] = get_product_degree_of_protection_DatArt(soup)
+        product_entry_DatArt['operating system'] = get_product_OS_DatArt(soup)
+        product_entry_DatArt['system superstructure'] = get_product_system_superstructure_DatArt(soup)
+        product_entry_DatArt['notification diode'] = get_product_notification_diode_DatArt(soup)
+        product_entry_DatArt['internal memory'] = get_product_int_memory_DatArt(soup)
+        product_entry_DatArt['RAM'] = get_product_RAM_DatArt(soup)
+        product_entry_DatArt['memory card slot'] = get_product_memory_card_slot_DatArt(soup)
+        product_entry_DatArt['maximum memory card size'] = get_product_maximum_memory_card_size_DatArt(soup)
+
+        if get_product_wireless_tech_list_DatArt(soup):
+            for obj in get_product_wireless_tech_list_DatArt(soup):
+                product_entry_DatArt[obj] = 1
+
+        product_entry_DatArt['number of rear camera lenses'] = get_product_no_rear_cam_lenses_DatArt(soup)
+        product_entry_DatArt['number of front camera lenses'] = get_product_no_front_cam_lenses_DatArt(soup)
+        product_entry_DatArt['rear cam resolution'] = get_product_rear_cam_resolution_DatArt(soup)
+        product_entry_DatArt['front cam resolution'] = get_product_front_cam_resolution_DatArt(soup)
+
+        if get_product_camera_features_DatArt(soup):
+            for obj in get_product_camera_features_DatArt(soup):
+                product_entry_DatArt[obj] = 1
+
+        product_entry_DatArt['battery type'] = get_product_battery_type_DatArt(soup)
+        product_entry_DatArt['battery capacity'] = get_product_battery_capacity_DatArt(soup)
+
+        if get_product_battery_features_DatArt(soup):
+            for obj in get_product_battery_features_DatArt(soup):
+                product_entry_DatArt[obj] = 1
+
+        product_entry_DatArt['charging power'] = get_product_charging_power_DatArt(soup)
+
+        if get_product_security_DatArt(soup):
+            for obj in get_product_security_DatArt(soup):
+                product_entry_DatArt[obj] = 1
+        
+        product_entry_DatArt['connector'] = get_product_connector_DatArt(soup)
+        product_entry_DatArt['3.5mm jack'] = get_product_3_5mm_jack_DatArt(soup)
+        product_entry_DatArt['warranty'] = get_product_warranty_DatArt(soup)
+        product_entry_DatArt['FM-radio'] = get_product_fm_radio_DatArt(soup)
+        product_entry_DatArt['colour'] = get_product_colour_DatArt(soup)
+        product_entry_DatArt['brand'] = get_product_brand_DatArt(soup)
+        product_entry_DatArt['width'] = get_product_width_DatArt(soup)
+        product_entry_DatArt['length'] = get_product_length_DatArt(soup)
+        product_entry_DatArt['depth'] = get_product_depth_DatArt(soup)
+        product_entry_DatArt['volume'] = get_product_volume_DatArt(soup)
+        product_entry_DatArt['weight'] = get_product_weight_DatArt(soup)
+
+        products_Data.append(product_entry_DatArt)
+        print(f"Product {product_number} finished")
+    return products_Data
 
 # 3. Functions for scraping product information characteristics for a given product (URL) from Electroworld
 
@@ -882,7 +1067,7 @@ def find_chromedriver():
     return None
 
 # Function to get the BeautifulSoup object for a given Electroworld product page
-def get_soup_Electroworld(product_url, max_retries = 5):
+def get_soup_Electroworld(product_url, max_retries = 10):
     # Check type of argument
     if not isinstance(product_url, str):
             raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(product_url)}.")
@@ -893,7 +1078,7 @@ def get_soup_Electroworld(product_url, max_retries = 5):
             driver = webdriver.Chrome()
             driver.get(product_url)
             # Finding the buttons on the product page
-            buttons = WBW(driver, 20).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'btn.w-100.maw-345px.btn-secondary.btn-sm')))
+            buttons = WBW(driver, 30).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'btn.w-100.maw-345px.btn-secondary.btn-sm')))
 
             # Pushing the button for product parameters
             desired_text = "Zobrazit všechny parametry"
@@ -906,7 +1091,7 @@ def get_soup_Electroworld(product_url, max_retries = 5):
                     # Break out of the loop once the button is found and clicked
                     break
             # Go to the product parameters on the page
-            WBW(driver, 20).until(EC.presence_of_element_located((By.XPATH, '//*[@id="product-params"]/div/div/div[2]/div[1]/table/tbody/tr[1]/th')))
+            WBW(driver, 30).until(EC.presence_of_element_located((By.XPATH, '//*[@id="product-params"]/div/div/div[2]/div[1]/table/tbody/tr[1]/th')))
             page_source = driver.page_source
             soup = BeautifulSoup(page_source, 'html.parser')
             return soup
@@ -1014,7 +1199,10 @@ def get_product_width_Electroworld(soup):
             raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup)}.")
         if soup.select_one('.product-parameters tbody th:-soup-contains("Šířka") + td'):
             soup_product_width = soup.select_one('.product-parameters tbody th:-soup-contains("Šířka") + td').get_text()
-            product_width = float(re.search(r'(\d+\.\d+)', soup_product_width).group(1))
+            try: 
+                product_width = (float(re.search(r'(\d+\.\d+)', soup_product_width).group(1)))/10
+            except Exception:
+                product_width = (float(re.search(r'(\d+)', soup_product_width).group(1)))/10
         else:
             product_width = None
         return product_width
@@ -1026,7 +1214,10 @@ def get_product_depth_Electroworld(soup):
             raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup)}.")
         if soup.select_one('.product-parameters tbody th:-soup-contains("Výška") + td'):
             soup_product_depth = soup.select_one('.product-parameters tbody th:-soup-contains("Výška") + td').get_text()
-            product_depth = float(re.search(r'(\d+\.\d+)', soup_product_depth).group(1))
+            try:
+                product_depth = (float(re.search(r'(\d+\.\d+)', soup_product_depth).group(1)))/10
+            except Exception:
+                product_depth = (float(re.search(r'(\d+)', soup_product_depth).group(1)))/10
         else:
             product_depth = None
         return product_depth
@@ -1038,7 +1229,10 @@ def get_product_length_Electroworld(soup):
             raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup)}.")
         if soup.select_one('.product-parameters tbody th:-soup-contains("Délka") + td'):
             soup_product_length = soup.select_one('.product-parameters tbody th:-soup-contains("Délka") + td').get_text()
-            product_length = float(re.search(r'(\d+\.\d+)', soup_product_length).group(1))
+            try:
+                product_length = (float(re.search(r'(\d+\.\d+)', soup_product_length).group(1)))/10
+            except Exception:
+                product_length = (float(re.search(r'(\d+)', soup_product_length).group(1)))/10
         else:
             product_length = None
         return product_length
@@ -1050,17 +1244,26 @@ def get_product_volume_Electroworld(soup):
             raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup)}.")
         if soup.select_one('.product-parameters tbody th:-soup-contains("Šířka") + td'):
             soup_product_width = soup.select_one('.product-parameters tbody th:-soup-contains("Šířka") + td').get_text()
-            product_width = float(re.search(r'(\d+\.\d+)', soup_product_width).group(1))
+            try:
+                product_width = (float(re.search(r'(\d+\.\d+)', soup_product_width).group(1)))/10
+            except Exception:
+                product_width = (float(re.search(r'(\d+)', soup_product_width).group(1)))/10
         else:
             product_width = None
         if soup.select_one('.product-parameters tbody th:-soup-contains("Výška") + td'):
             soup_product_depth = soup.select_one('.product-parameters tbody th:-soup-contains("Výška") + td').get_text()
-            product_depth = float(re.search(r'(\d+\.\d+)', soup_product_depth).group(1))
+            try:
+                product_depth = (float(re.search(r'(\d+\.\d+)', soup_product_depth).group(1)))/10
+            except Exception:
+                product_depth = (float(re.search(r'(\d+)', soup_product_depth).group(1)))/10
         else:
             product_depth = None
         if soup.select_one('.product-parameters tbody th:-soup-contains("Délka") + td'):
             soup_product_length = soup.select_one('.product-parameters tbody th:-soup-contains("Délka") + td').get_text()
-            product_length = float(re.search(r'(\d+\.\d+)', soup_product_length).group(1))
+            try:
+                product_length = (float(re.search(r'(\d+\.\d+)', soup_product_length).group(1)))/10
+            except Exception:
+                product_length = (float(re.search(r'(\d+)', soup_product_length).group(1)))/10
         else:
             product_length = None
         if product_width*product_depth*product_length:
@@ -1082,16 +1285,26 @@ def get_product_weight_Electroworld(soup):
         return product_weight
 
 # Function to return the bluetooth version for a given product (page) as a string
+def get_product_bluetooth_version_Electroworld(soup):
+        # Check type of argument
+        if not isinstance(soup, BeautifulSoup):
+            raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup)}.")
+        if soup.select_one('.product-parameters tbody th:-soup-contains("Verze Bluetooth") + td'):
+            bluetooth_version = str(soup.select_one('.product-parameters tbody th:-soup-contains("Verze Bluetooth") + td').get_text().replace("\n", "").strip())
+        else:
+            bluetooth_version = None
+        return bluetooth_version
+
+# Function to return 1 if a product has bluetooth, and 0 otherwise 
 def get_product_bluetooth_Electroworld(soup):
         # Check type of argument
         if not isinstance(soup, BeautifulSoup):
             raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup)}.")
         if soup.select_one('.product-parameters tbody th:-soup-contains("Verze Bluetooth") + td'):
-            bluetooth = str(soup.select_one('.product-parameters tbody th:-soup-contains("Verze Bluetooth") + td').get_text().replace("\n", "").strip())
-            #bluetooth = 1
+            bluetooth = 1
         else:
-            bluetooth = None
-        return bluetooth
+            bluetooth = 0
+        return bool(bluetooth)
 
 # Function to return the wifi standard for a given product (page) as a string
 def get_product_wifi_standard_Electroworld(soup):
@@ -1105,6 +1318,17 @@ def get_product_wifi_standard_Electroworld(soup):
             wifi_standard = None
         return wifi_standard
 
+# Function to return 1 if a product has wifi, and 0 otherwise 
+def get_product_wifi_Electroworld(soup):
+        # Check type of argument
+        if not isinstance(soup, BeautifulSoup):
+            raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup)}.")
+        if soup.select_one('.product-parameters tbody th:-soup-contains("Wi-Fi standardy") + td'):
+            wifi = 1
+        else:
+            wifi = 0
+        return bool(wifi)
+
 # Function to return 1 if a product has NFC, and 0 otherwise 
 def get_product_NFC_Electroworld(soup):
         # Check type of argument
@@ -1117,8 +1341,8 @@ def get_product_NFC_Electroworld(soup):
             if NFC == "Ne":
                 NFC = 0
         else:
-            NFC = None
-        return NFC
+            NFC = 0
+        return bool(NFC)
 
 # Function to return the connector for a given product (page) as a string
 def get_product_connector_Electroworld(soup):
@@ -1128,7 +1352,7 @@ def get_product_connector_Electroworld(soup):
         if soup.select_one('.product-parameters tbody th:-soup-contains("Konektor") + td'):
             connector = str(soup.select_one('.product-parameters tbody th:-soup-contains("Konektor") + td').get_text().replace("\n", "").strip())
         else:
-            connector = None
+            connector = "other"
         return connector
 
 # Function to return 1 if a product has 3.5mm jack, and 0 otherwise 
@@ -1143,8 +1367,8 @@ def get_product_3_5_mm_jack_Electroworld(soup):
             if jack == "Ne":
                  jack = 0
         else:
-            jack = None
-        return jack
+            jack = 0
+        return bool(jack)
 
 # Function to return the display size (in cm) for a given product (page) as a float number
 def get_product_display_size_Electroworld(soup):
@@ -1153,7 +1377,10 @@ def get_product_display_size_Electroworld(soup):
             raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup)}.")
         if soup.select_one('.product-parameters tbody th:-soup-contains("Úhlopříčka") + td'):
             soup_display_size= soup.select_one('.product-parameters tbody th:-soup-contains("Úhlopříčka") + td').get_text()
-            display_size = float(re.search(r'(\d+\.\d+)', soup_display_size).group(1))
+            try:
+                display_size = float(re.search(r'(\d+\.\d+)', soup_display_size).group(1))
+            except Exception:
+                display_size = float(re.search(r'(\d+)', soup_display_size).group(1))
         else:
             display_size = None
         return display_size
@@ -1219,7 +1446,7 @@ def get_product_display_refresh_rate_Electroworld(soup):
             display_refresh_rate = None
         return display_refresh_rate
 
-# Function to return the display resolution for a given product (page) as a string
+# Function to return the display resolution label for a given product (page) as a string
 def get_product_display_resolution_label_Electroworld(soup):
         # Check type of argument
         if not isinstance(soup, BeautifulSoup):
@@ -1265,8 +1492,8 @@ def get_product_smart_Electroworld(soup):
             if smart == "Ne":
                 smart = 0
         else:
-            smart = None
-        return smart
+            smart = 0
+        return bool(smart)
 
 # Function to return 1 if a product is water-resistant, and 0 otherwise 
 def get_product_water_resistant_Electroworld(soup):
@@ -1280,8 +1507,8 @@ def get_product_water_resistant_Electroworld(soup):
             if water_resistant == "Ne":
                 water_resistant = 0
         else:
-            water_resistant = None
-        return water_resistant
+            water_resistant = 0
+        return bool(water_resistant)
 
 # Function to return the degree of protection for a given product (page) as a string
 def get_product_degree_of_protection_Electroworld(soup):
@@ -1290,9 +1517,10 @@ def get_product_degree_of_protection_Electroworld(soup):
             raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup)}.")
         if soup.select_one('.product-parameters tbody th:-soup-contains("Stupeň krytí") + td'):
             degree_of_protection = str(soup.select_one('.product-parameters tbody th:-soup-contains("Stupeň krytí") + td').get_text().replace("\n", "").strip())
-            
+            if degree_of_protection == "nemá":
+                degree_of_protection = "No protection"
         else:
-            degree_of_protection = None
+            degree_of_protection = "No protection"
         return degree_of_protection
 
 # Function to return the operating system for a given product (page) as a string
@@ -1304,7 +1532,7 @@ def get_product_operating_system_Electroworld(soup):
             operating_system = str(soup.select_one('.product-parameters tbody th:-soup-contains("Verze operač.sys.") + td').get_text().replace("\n", "").strip())
             
         else:
-            operating_system = None
+            operating_system = "other"
         return operating_system
 
 # Function to return the brand of the operating system for a given product (page) as a string
@@ -1331,8 +1559,8 @@ def get_product_gps_Electroworld(soup):
             if gps == "Ne":
                 gps = 0
         else:
-            gps = None
-        return gps
+            gps = 0
+        return bool(gps)
 
 # Function to return 1 if a product supports wireless charging, and 0 otherwise 
 def get_product_wireless_charging_Electroworld(soup):
@@ -1346,8 +1574,8 @@ def get_product_wireless_charging_Electroworld(soup):
             if wireless_charging  == "Ne":
                 wireless_charging  = 0
         else:
-            wireless_charging  = None
-        return wireless_charging 
+            wireless_charging  = 0
+        return bool(wireless_charging)
 
 # Function to return 1 if a product contains fast charging, and 0 otherwise 
 def get_product_fast_charging_Electroworld(soup):
@@ -1361,15 +1589,15 @@ def get_product_fast_charging_Electroworld(soup):
             if fast_charging  == "Ne":
                 fast_charging  = 0
         else:
-            fast_charging  = None
-        return fast_charging
+            fast_charging  = 0
+        return bool(fast_charging)
 
 # Function to return a list of strings of security controls for a given product (page)
 def get_product_security_controls_Electroworld(soup):
         # Check type of argument
         if not isinstance(soup, BeautifulSoup):
             raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup)}.")
-        if soup.select_one('.product-parameters tbody th:-soup-contains("Prvky zabezpečení") + td').get_text():
+        if soup.select_one('.product-parameters tbody th:-soup-contains("Prvky zabezpečení") + td'):
             security_controls = str(soup.select_one('.product-parameters tbody th:-soup-contains("Prvky zabezpečení") + td').get_text().replace("\n", "").strip()).split(', ')
             # Changing czech to english labelling. If there would be a new label, "Other security option(s)" will be printed.
             if "Odemykání tváří" in security_controls:
@@ -1388,7 +1616,7 @@ def get_product_security_controls_Electroworld(soup):
                 # Replace values
                 security_controls[index] = "in-display fingerprint reader"
             if security_controls and all(element not in security_controls for element in ["face unlock", "body fingerprint reader", "in-display fingerprint reader"]):
-                security_controls = "Other security option(s)"
+                security_controls = ["Other security option(s)"]
         else:
             security_controls  = None
         return security_controls
@@ -1401,7 +1629,7 @@ def get_product_processor_manufacturer_Electroworld(soup):
         if soup.select_one('.product-parameters tbody th:-soup-contains("Typ procesoru") + td'):
             processor_manufacturer = str(soup.select_one('.product-parameters tbody th:-soup-contains("Typ procesoru") + td').get_text().replace("\n", "").strip())
         else:
-            processor_manufacturer  = None
+            processor_manufacturer  = "other"
         return processor_manufacturer
 
 # Function to return the processor model for a given product (page) as a string
@@ -1412,7 +1640,7 @@ def get_product_processor_model_Electroworld(soup):
         if soup.select_one('.product-parameters tbody th:-soup-contains("Verze procesoru") + td'):
             processor_model = str(soup.select_one('.product-parameters tbody th:-soup-contains("Verze procesoru") + td').get_text().replace("\n", "").strip())
         else:
-            processor_model  = None
+            processor_model  = "other"
         return processor_model
 
 # Function to return the number of cores for a given product (page) as an integer
@@ -1423,7 +1651,7 @@ def get_product_number_of_cores_Electroworld(soup):
         if soup.select_one('.product-parameters tbody th:-soup-contains("Počet jader procesoru") + td'):
             number_of_cores = int(soup.select_one('.product-parameters tbody th:-soup-contains("Počet jader procesoru") + td').get_text().replace("\n", "").strip())
         else:
-            number_of_cores  = None
+            number_of_cores  = 0
         return number_of_cores
 
 # Function to return 1 if a product supports 4G/LTE, and 0 otherwise 
@@ -1438,8 +1666,8 @@ def get_product_4G_LTE_Electroworld(soup):
             if LTE_4G  == "Ne":
                 LTE_4G  = 0
         else:
-            LTE_4G  = None
-        return LTE_4G
+            LTE_4G  = 0
+        return bool(LTE_4G)
 
 # Function to return 1 if a product contains dual SIM, and 0 otherwise 
 def get_product_dual_sim_support_Electroworld(soup):
@@ -1453,8 +1681,8 @@ def get_product_dual_sim_support_Electroworld(soup):
             if dual_sim_support  == "Ne":
                 dual_sim_support  = 0
         else:
-            dual_sim_support  = None
-        return dual_sim_support
+            dual_sim_support  = 0
+        return bool(dual_sim_support)
 
 # Function to return the sim card type for a given product (page) as a string
 def get_product_sim_card_type_Electroworld(soup):
@@ -1463,8 +1691,12 @@ def get_product_sim_card_type_Electroworld(soup):
             raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup)}.")
         if soup.select_one('.product-parameters tbody th:-soup-contains("Typ SIM karty") + td'):
             sim_card_type = str(soup.select_one('.product-parameters tbody th:-soup-contains("Typ SIM karty") + td').get_text().replace("\n", "").strip())
+            if sim_card_type == "nano sim":
+                sim_card_type = "nano SIM"
+            if sim_card_type == "eSIM, nano sim":
+                sim_card_type = "nano SIM + eSIM"
         else:
-            sim_card_type  = None
+            sim_card_type  = "other"
         return sim_card_type
 
 # Function to return 1 if a product supports 5G, and 0 otherwise 
@@ -1479,8 +1711,8 @@ def get_product_5G_Electroworld(soup):
             if dummy_5G  == "Ne":
                 dummy_5G  = 0
         else:
-            dummy_5G  = None
-        return dummy_5G
+            dummy_5G  = 0
+        return bool(dummy_5G)
 
 # Function to return the configuration cards for a given product (page) as a string
 def get_product_config_cards_Electroworld(soup):
@@ -1489,8 +1721,24 @@ def get_product_config_cards_Electroworld(soup):
             raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup)}.")
         if soup.select_one('.product-parameters tbody th:-soup-contains("Konfigurace karet") + td'):
             config_cards = str(soup.select_one('.product-parameters tbody th:-soup-contains("Konfigurace karet") + td').get_text().replace("\n", "").strip())
+            if config_cards == "Dual SIM + paměťová karta":
+                config_cards = "Dual SIM + memory card"
+            if config_cards == "Dual SIM, Single SIM + paměťová karta":
+                config_cards = "Dual SIM, Single SIM + memory card"
+            if config_cards == "Single SIM + paměťová karta":
+                config_cards = "Single SIM + memory card"
+            if config_cards == "Single SIM + eSIM + paměťová karta":
+                config_cards = "Single SIM + eSIM + Memory Card"
+            if config_cards == "Single SIM + paměťová karta, Dual SIM":
+                config_cards = "Single SIM + Memory Card, Dual SIM"
+            if config_cards == "Single SIM + paměťová karta, Single SIM + eSIM, eSIM + paměťová karta":
+                config_cards = "Single SIM + Memory Card, Single SIM + eSIM, eSIM + Memory Card"
+            if config_cards == "Single SIM + eSIM, Single SIM + paměťová karta, eSIM + paměťová karta":
+                config_cards = "Single SIM + eSIM, Single SIM + Memory Card, eSIM + Memory Card"
+            if config_cards == "Single SIM + eSIM, eSIM + paměťová karta, Single SIM + paměťová karta":
+                config_cards = "Single SIM + eSIM, eSIM + Memory Card, Single SIM + Memory Card"
         else:
-            config_cards  = None
+            config_cards  = "other"
         return config_cards
 
 # Function to return 1 the product contains a memory card slot, and 0 otherwise 
@@ -1505,8 +1753,8 @@ def get_product_memory_card_slot_Electroworld(soup):
             if memory_card_slot == "Ne":
                  memory_card_slot = 0
         else:
-            memory_card_slot  = None
-        return memory_card_slot
+            memory_card_slot  = 0
+        return bool(memory_card_slot)
 
 # Function to return the battery capacity (in mAh) for a given product (page) as an integer
 def get_product_battery_capacity_Electroworld(soup):
@@ -1520,13 +1768,13 @@ def get_product_battery_capacity_Electroworld(soup):
             battery_capacity  = None
         return battery_capacity
 
-# Function to return the charging power (in W) for a given product (page) as an integer
+# Function to return the charging power/wireless charging power (in W) for a given product (page) as an integer
 def get_product_charging_power_Electroworld(soup):
         # Check type of argument
         if not isinstance(soup, BeautifulSoup):
             raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup)}.")
-        if soup.select_one('.product-parameters tbody th:-soup-contains("Výkon nabíjení ") + td'):
-            soup_charging_power = soup.select_one('.product-parameters tbody th:-soup-contains("Výkon nabíjení ") + td').get_text()
+        if soup.select_one('.product-parameters tbody th:-soup-contains("Výkon nabíjení") + td'):
+            soup_charging_power = soup.select_one('.product-parameters tbody th:-soup-contains("Výkon nabíjení") + td').get_text()
             charging_power = int(re.search(r'(\d+)', soup_charging_power).group(1)) 
         else:
             charging_power  = None
@@ -1557,8 +1805,8 @@ def get_product_front_cam_Electroworld(soup):
             if front_cam  == "Ne":
                 front_cam  = 0
         else:
-            front_cam  = None
-        return front_cam
+            front_cam  = 0
+        return bool(front_cam)
 
 # Function to return the rear camera resolutio (in pixels) for a given product (page) as a float number
 def get_product_rear_cam_resolution_Electroworld(soup):
@@ -1618,8 +1866,8 @@ def get_product_fm_radio_Electroworld(soup):
             if fm_radio == "Ne":
                 fm_radio  = 0
         else:
-            fm_radio  = None
-        return fm_radio
+            fm_radio  = 0
+        return bool(fm_radio)
 
 # Function to return 1 the product contains a buil-in-flash, and 0 otherwise 
 def get_product_built_in_flash_Electroworld(soup):
@@ -1633,8 +1881,8 @@ def get_product_built_in_flash_Electroworld(soup):
             if built_in_flash  == "Ne":
                 built_in_flash  = 0
         else:
-            built_in_flash  = None
-        return built_in_flash
+            built_in_flash  = 0
+        return bool(built_in_flash)
 
 # Function to return the flash type for a given product (page) as an string
 def get_product_flash_type_Electroworld(soup):
@@ -1656,7 +1904,7 @@ def get_product_wireless_charging_performance_Electroworld(soup):
             soup_wireless_charging_performance = soup.select_one('.product-parameters tbody th:-soup-contains("Výkon bezdrátového nabíjení") + td').get_text().replace("\n", "").strip()
             wireless_charging_performance = int(re.search(r'(\d+)', soup_wireless_charging_performance).group(1))
         else:
-            wireless_charging_performance = None
+            wireless_charging_performance = 0
         return wireless_charging_performance
 
 # Function to return the number of ratings for a given product (page) as an integer
@@ -1684,3 +1932,108 @@ def get_product_rating_Electroworld(soup):
         else:
             rating = None
         return rating
+
+# Function to scrape all product information characteristics (for all URLs) from Electroworld
+def get_product_info_Electroworld(product_url_list):
+    # Check type of argument
+    if not isinstance(product_url_list, list):
+        raise TypeError(f"Input must be a list. Your input has the type: {type(product_url_list)}.")
+    # Placeholder list for product dictionaries
+    products_Data =[]
+    for product_number, product_url in enumerate(product_url_list, start = 1):
+        # Placeholder dictionary for product characteristics
+        product_entry_Electroworld = {} 
+        # A large part of the product characteristics is hidden behind a button to extend the parameters shown on the product page
+        # Here the selenium package is used to push the button of the webpage in the background to scrape the hidden product information
+        try:
+            soup = get_soup_Electroworld(product_url)
+        except Exception as e:
+            print(f"Failed to retrieve data. Final Exception: {str(e)}")
+        product_entry_Electroworld["ID"] = product_number 
+        product_entry_Electroworld["online-retailer"] = "Electroworld" 
+        product_entry_Electroworld["title"] = get_product_title_Electroworld(soup) 
+        product_entry_Electroworld["price"] = get_product_price_Electroworld(soup) 
+        product_entry_Electroworld["colour"] = get_product_colour_Electroworld(soup) 
+        product_entry_Electroworld["RAM"] = get_product_RAM_Electroworld(soup) 
+        product_entry_Electroworld["width"] = get_product_width_Electroworld(soup) 
+        product_entry_Electroworld["depth"] = get_product_depth_Electroworld(soup) 
+        product_entry_Electroworld["length"] = get_product_length_Electroworld(soup) 
+        product_entry_Electroworld["volume"] = get_product_volume_Electroworld(soup) 
+        product_entry_Electroworld["weight"] = get_product_weight_Electroworld(soup) 
+        product_entry_Electroworld["bluetooth version"] = get_product_bluetooth_version_Electroworld(soup) 
+        product_entry_Electroworld["Bluetooth"] = get_product_bluetooth_Electroworld(soup) 
+        product_entry_Electroworld["WiFi standard"] = get_product_wifi_standard_Electroworld(soup) 
+        product_entry_Electroworld["Wi-Fi"] = get_product_wifi_Electroworld(soup) 
+        product_entry_Electroworld["NFC"] = get_product_NFC_Electroworld(soup) 
+        product_entry_Electroworld["connector"] = get_product_connector_Electroworld(soup) 
+        product_entry_Electroworld["3.5mm jack"] = get_product_3_5_mm_jack_Electroworld(soup) 
+        product_entry_Electroworld["display size"] = get_product_display_size_Electroworld(soup) 
+        product_entry_Electroworld["display type"] = get_product_display_type_Electroworld(soup) 
+        product_entry_Electroworld["resolution width"] = get_product_display_resolution_w_Electroworld(soup) 
+        product_entry_Electroworld["resolution height"] = get_product_display_resolution_h_Electroworld(soup) 
+        product_entry_Electroworld["resolution total"] = get_product_display_resolution_tot_Electroworld(soup) 
+        product_entry_Electroworld["display refresh rate"] = get_product_display_refresh_rate_Electroworld(soup) 
+        product_entry_Electroworld["resolution label"] = get_product_display_resolution_label_Electroworld(soup) 
+        product_entry_Electroworld["display fineness"] = get_product_display_fineness_Electroworld(soup) 
+        product_entry_Electroworld["brand"] = get_product_brand_Electroworld(soup) 
+        product_entry_Electroworld["smart"] = get_product_smart_Electroworld(soup) 
+        product_entry_Electroworld["water resistant"] = get_product_water_resistant_Electroworld(soup) 
+        product_entry_Electroworld["degree of protection"] = get_product_degree_of_protection_Electroworld(soup)
+        product_entry_Electroworld["operating system"] = get_product_operating_system_Electroworld(soup) 
+        product_entry_Electroworld["os brand"] = get_product_os_brand_Electroworld(soup)
+        product_entry_Electroworld["GPS"] = get_product_gps_Electroworld(soup) 
+        product_entry_Electroworld["wireless charging"] = get_product_wireless_charging_Electroworld(soup) 
+        product_entry_Electroworld["fast charging"] = get_product_fast_charging_Electroworld(soup) 
+        if get_product_security_controls_Electroworld(soup): 
+            for obj in get_product_security_controls_Electroworld(soup):
+                product_entry_Electroworld[obj] = 1
+        product_entry_Electroworld["processor manufacturer"] = get_product_processor_manufacturer_Electroworld(soup) 
+        product_entry_Electroworld["processor model"] = get_product_processor_model_Electroworld(soup) 
+        product_entry_Electroworld["number of cores"] = get_product_number_of_cores_Electroworld(soup) 
+        product_entry_Electroworld["4G/LTE"] = get_product_4G_LTE_Electroworld(soup) 
+        product_entry_Electroworld["dual SIM support"] = get_product_dual_sim_support_Electroworld(soup) 
+        product_entry_Electroworld["SIM card type"] = get_product_sim_card_type_Electroworld(soup) 
+        product_entry_Electroworld["5G"] = get_product_5G_Electroworld(soup) 
+        product_entry_Electroworld["configuration cards"] = get_product_config_cards_Electroworld(soup)
+        product_entry_Electroworld["memory card slot"] = get_product_memory_card_slot_Electroworld(soup) 
+        product_entry_Electroworld["battery capacity"] = get_product_battery_capacity_Electroworld(soup) 
+        product_entry_Electroworld["charging power"] = get_product_charging_power_Electroworld(soup) 
+        product_entry_Electroworld["internal memory"] = get_product_internal_memory_Electroworld(soup) 
+        product_entry_Electroworld["front cam"] = get_product_front_cam_Electroworld(soup) 
+        product_entry_Electroworld["rear cam resolution"] = get_product_rear_cam_resolution_Electroworld(soup) 
+        product_entry_Electroworld["front cam resolution"] = get_product_front_cam_resolution_Electroworld(soup) 
+        product_entry_Electroworld["number of rear camera lenses"] =  get_product_no_rear_cam_lenses_Electroworld(soup) 
+        product_entry_Electroworld["number of front camera lenses"] = get_product_no_front_cam_lenses_Electroworld(soup) 
+        product_entry_Electroworld["FM-radio"] = get_product_fm_radio_Electroworld(soup) 
+        product_entry_Electroworld["built-in flash"] = get_product_built_in_flash_Electroworld(soup) 
+        product_entry_Electroworld["flash type"] = get_product_flash_type_Electroworld(soup) 
+        product_entry_Electroworld["wireless charging performance"] = get_product_wireless_charging_performance_Electroworld(soup) 
+        product_entry_Electroworld["number of ratings"] = get_product_no_ratings_Electroworld(soup) 
+        product_entry_Electroworld["rating"] = get_product_rating_Electroworld(soup) 
+        products_Data.append(product_entry_Electroworld)
+        print(f"Product {product_number} finished")
+    return products_Data
+
+# 4. Functions for merging data from multiple lists of product dictionaries
+
+# Function to get the common keys of two lists of dictionaries 
+def get_common_variables(dataset_1, dataset_2):
+    # Check type of arguments
+    if not isinstance(dataset_1, list):
+        raise TypeError(f"Input must be a list. Your input has the type: {type(dataset_1)}.")
+    if not isinstance(dataset_2, list):
+        raise TypeError(f"Input must be a list. Your input has the type: {type(dataset_2)}.")
+    # Extracting the names of all variables from both data sets (DatArt and Electroworld). Thereby, excluding the ID variable.
+    keys_dataset_1 = set().union(*(variable.keys() - {'ID'} for variable in dataset_1))
+    keys_dataset_2 = set().union(*(variable.keys() - {'ID'} for variable in dataset_2))
+    # Get the common variables
+    return keys_dataset_1.intersection(keys_dataset_2)
+
+# Function to extract relevant variables from a product dictionary
+def extract_variables(product_dict, list_of_variables):
+    # Check type of arguments
+    if not isinstance(product_dict, dict):
+        raise TypeError(f"Input must be a dictionary. Your input has the type: {type(product_dict)}.")
+    if not isinstance(list_of_variables, set):
+        raise TypeError(f"Input must be a set. Your input has the type: {type(list_of_variables)}.")
+    return {variable: product_dict[variable] for variable in list_of_variables}
