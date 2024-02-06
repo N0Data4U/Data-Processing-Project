@@ -6,6 +6,7 @@ import os;
 import requests, re;
 from bs4 import BeautifulSoup;
 from datetime import datetime;
+import pandas as pd;
 from selenium import webdriver;
 from selenium.webdriver.common.by import By;
 from selenium.webdriver.support.ui import WebDriverWait as WBW;
@@ -314,13 +315,13 @@ def get_product_no_cores_DatArt(soup_product_page):
         no_cores = no_cores = str(soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Počet jader") + td').get_text())
         # Changing czech to english labelling. If there would be a new label, "Other core" will be printed.
         if no_cores == "desetijádrový":
-            no_cores = 10
+            no_cores = int(10)
         if no_cores == "osmijádrový":
-            no_cores = 8
+            no_cores = int(8)
         if no_cores == "šestijádrový":
-            no_cores = 6
+            no_cores = int(6)
         if no_cores == "čtyřjádrový":
-            no_cores = 4
+            no_cores = int(4)
         if no_cores not in [10, 8, 6, 4]:
             no_cores = "other"
     else: 
@@ -1904,7 +1905,7 @@ def get_product_wireless_charging_performance_Electroworld(soup):
             soup_wireless_charging_performance = soup.select_one('.product-parameters tbody th:-soup-contains("Výkon bezdrátového nabíjení") + td').get_text().replace("\n", "").strip()
             wireless_charging_performance = int(re.search(r'(\d+)', soup_wireless_charging_performance).group(1))
         else:
-            wireless_charging_performance = 0
+            wireless_charging_performance = None
         return wireless_charging_performance
 
 # Function to return the number of ratings for a given product (page) as an integer
@@ -2037,3 +2038,66 @@ def extract_variables(product_dict, list_of_variables):
     if not isinstance(list_of_variables, set):
         raise TypeError(f"Input must be a set. Your input has the type: {type(list_of_variables)}.")
     return {variable: product_dict[variable] for variable in list_of_variables}
+
+# 5. Function for data analysis
+
+# Function to extract the metric variables (int and float) from a dataframe and create a new data frame
+def get_metric_variables(data_frame):
+    # Check type of argument
+    if not isinstance(data_frame, pd.DataFrame):
+        raise TypeError(f"Input must be a pandas DataFrame. Your input has the type: {type(data_frame)}.")
+    data_frame_metric = data_frame.select_dtypes(include=['float', 'int'])
+    # Exclude variable 'ID' from the DataFrame using drop()
+    data_frame_metric = data_frame_metric.drop(columns=['ID'])    
+    return data_frame_metric
+
+
+# Function to extract the categorical variables (str and bool) from a dataframe and create a new data frame
+def get_categorical_variables(data_frame):
+    # Check type of argument
+    if not isinstance(data_frame, pd.DataFrame):
+        raise TypeError(f"Input must be a pandas DataFrame. Your input has the type: {type(data_frame)}.")
+    return data_frame.select_dtypes(include=['object', 'bool'])
+
+# Function to create a table with summary calculations for a given table of metric variables
+def get_metric_variables_summary(data_frame):
+    # Check type of argument
+    if not isinstance(data_frame, pd.DataFrame):
+        raise TypeError(f"Input must be a pandas DataFrame. Your input has the type: {type(data_frame)}.")
+    return data_frame.describe().transpose().round(2)
+
+# Function to create a dictionary that includes a summary table for every categorical table, consisting of columns for counts and shares
+def get_categorical_variables_summary(data_frame):
+    # Check type of argument
+    if not isinstance(data_frame, pd.DataFrame):
+        raise TypeError(f"Input must be a pandas DataFrame. Your input has the type: {type(data_frame)}.")
+    # Initialize an empty dictionary to store DataFrames for each categorical variable
+    categorical_summary_dict = {}
+    # Iterate through each column in categorical_variables
+    for col in data_frame.columns:
+        counts = data_frame[col].value_counts()
+        percentages = counts / counts.sum()
+        
+        # Create a summary DataFrame for the current column
+        summary = pd.DataFrame({'Count': counts, 'Share': percentages})
+        
+        # Add a sum row to the summary DataFrame
+        sum_row = pd.DataFrame({'Count': [counts.sum()], 'Share': [percentages.sum()]}, index=['Total'])
+        summary = pd.concat([summary, sum_row])
+        
+        # Add the summary DataFrame to the dictionary with the column name as the key
+        categorical_summary_dict[col] = summary
+    return categorical_summary_dict
+
+# Function to get a table of comparison, including some statistical measures and highest votes for the different online-retailers
+def get_online_retailer_comparison_table(data_frame):
+    # Check type of argument
+    if not isinstance(data_frame, pd.DataFrame):
+            raise TypeError(f"Input must be a pandas DataFrame. Your input has the type: {type(data_frame)}.")
+    # Grouped by the online-retailer the average price, most supplied brand and the most supplied colour is calculated
+    table_retailers = data_frame.groupby('online-retailer').agg({'price': 'mean', 'brand': lambda x: x.value_counts().idxmax(), 'colour': lambda x: x.value_counts().idxmax()}).round(2)
+    # The number of products is added to the table
+    table_retailers['number of products'] = data_frame.shape[0]
+    # The columns are renamed
+    table_retailers.columns = ['Average price', 'Most supplied brand', 'Most supplied colour', 'Number of products']
+    return table_retailers
