@@ -206,6 +206,7 @@ Here the distribution of the absolute Shapley values is plotted instead.
 
 #### GAM - SHAP Absolute Values Waterfall Mean Plot 
 ![Graph 17](images/GAM_shap_waterfall_mean_plot.png)
+
 This plot shows the means of the absolute Shapley values for the features across data points. Here, the same variables as before show a significant positive impact on prices. It is worth to note that the first 8 features listed have the same impact on average as the sum of the 155 features at the bottom.
 
 In the next step, a non-additive boosted tree model is applied for comparison. Here, the same plots are applied.
@@ -217,6 +218,7 @@ Compared to the same plot above resulting from the GAM the total resolution show
 
 #### Non-Additive Boosted Tree Model - SHAP Values Scatter Plot (Total Resolution)
 ![Graph 20](images/Non_Add_Boosted_Tree_Model_shap_resolution_total.png)
+
 In this model the total resolution of a phone again shows a very linear and large positive impact on prices for increasing resolutions too. Further the data points are highlighted. Here, it can be seen that phone products with a relatively low total resolution does not support 5G. On the other hand, rare (high end) products equipped with very high total resolution almost always also support 5G. This makes sense.
 
 #### Non-Additive Boosted Tree Model - SHAP Values Waterfall Plot (Datapoint: 40)
@@ -226,14 +228,17 @@ The results for this observation are similar to those resulting from the GAM. Ag
 
 #### Non-Additive Boosted Tree Model - SHAP Values Waterfall Distribution Plot 
 ![Graph 21](images/Non_Add_Boosted_Tree_Model_shap_waterfall_distr.png)
+
 In the beeswarm plot it can be seen that similar variables compared to the GAM seem to have a large impact on phone prices. For increasing feature values, the display refresh rate, the internal memory, the total resolution and 5G have a large positive on phone prices. On the other hand, phones that not include a memory card slot seem to have higher prices compared to products including one. This can be due to relatively expensive Apple products that are not equipped with a memory card slot. The same holds for the existence of a 3.5mm jack support. Also the IPX8 degree or protection seems to have a positive impact in prices. With a closer look only expensive products are equipped with this protection.
 
 #### Non-Additive Boosted Tree Model - SHAP Absolute Values Waterfall Distribution Plot
 ![Graph 22](images/Non_Add_Boosted_Tree_Model_shap_waterfall_abs_distr.png)
+
 The same variables can be investigated with the beeswarm plot of the absolute Shapley values again.
 
 #### Non-Additive Boosted Tree Model - SHAP Absolute Values Waterfall Mean Plot 
 ![Graph 23](images/Non_Add_Boosted_Tree_Model_shap_waterfall_mean.png)
+
 Finally, the mean of the Shapley values can be investigated. Here, the display refresh rate, internal memory, total resolution, 5G and memory card slot have the largest impact on phone prices. The other 155 features also sum up to a large impact for every product. However, the internal memory, refresh rate and the total resolution together already have an equal impact on prices compared to the other 155 features on average. 
 
 ## Conclusion
