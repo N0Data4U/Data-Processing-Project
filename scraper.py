@@ -6,6 +6,7 @@ import os;
 import requests, re;
 from bs4 import BeautifulSoup;
 import csv;
+import dataframe_image as dfi;
 from datetime import datetime;
 import matplotlib.pyplot as plt
 import pandas as pd;
