@@ -5,12 +5,14 @@ from logging import config
 import os;
 import requests, re;
 from bs4 import BeautifulSoup;
+import csv;
 from datetime import datetime;
 import pandas as pd;
 from selenium import webdriver;
 from selenium.webdriver.common.by import By;
 from selenium.webdriver.support.ui import WebDriverWait as WBW;
 from selenium.webdriver.support import expected_conditions as EC;
+from sklearn.preprocessing import OneHotEncoder;
 # 1. Functions for scraping product URL's from all three online retailers
 
 # 1.1 DatArt - Function for sraping all product URLs of mobile phones from the mobile phone category page
@@ -133,7 +135,7 @@ def get_product_urls_Electroworld(basic_url, category_url, number_of_pages):
 
 # Function to return the title for a given product (page) as a string
 def get_product_title_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select('.product-detail-title')[0]:
@@ -144,7 +146,7 @@ def get_product_title_DatArt(soup_product_page):
 
 # Function to return the price (in CZK) for a given product (page) as an integer
 def get_product_price_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select('.actual')[0]:
@@ -155,7 +157,7 @@ def get_product_price_DatArt(soup_product_page):
 
 # Function to return the number of ratings for a given product (page) as an integer
 def get_product_no_ratings_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select('.rating-wrap')[0]:
@@ -173,7 +175,7 @@ def get_product_no_ratings_DatArt(soup_product_page):
 
 # Function to return the rating for a given product (page) as a float number
 def get_product_rating_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select('.rating-wrap')[0]:
@@ -193,7 +195,7 @@ def get_product_rating_DatArt(soup_product_page):
 
 # Function to return the display size (in inches) for a given product (page) as a float number
 def get_product_display_size_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Úhlopříčka displeje") + td'):
@@ -204,7 +206,7 @@ def get_product_display_size_DatArt(soup_product_page):
 
 # Function to return the display resolution (width in pixels) for a given product (page) as an integer
 def get_product_resolution_w_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Rozlišení displeje") + td'):
@@ -219,7 +221,7 @@ def get_product_resolution_w_DatArt(soup_product_page):
 
 # Function to return the display resolution (height in pixels) for a given product (page) as an integer
 def get_product_resolution_h_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Rozlišení displeje") + td'):
@@ -234,7 +236,7 @@ def get_product_resolution_h_DatArt(soup_product_page):
 
 # Function to return the display resolution (product of width and height in pixels) for a given product (page) as an integer
 def get_product_resolution_tot_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Rozlišení displeje") + td'):
@@ -253,7 +255,7 @@ def get_product_resolution_tot_DatArt(soup_product_page):
 
 # Function to return the display refresh rate (in Hertz) for a given product (page) as an integer
 def get_product_display_refresh_rate_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Obnovovací frekvence displeje") + td'):
@@ -265,7 +267,7 @@ def get_product_display_refresh_rate_DatArt(soup_product_page):
 
 # Function to return the cutout shape for a given product (page) as a string
 def get_product_cutout_shape_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Tvar výřezu") + td'):
@@ -287,7 +289,7 @@ def get_product_cutout_shape_DatArt(soup_product_page):
 
 # Function to return the processor manufacturer for a given product (page) as a string
 def get_product_processor_manufacturer_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Výrobce procesoru") + td'):
@@ -298,7 +300,7 @@ def get_product_processor_manufacturer_DatArt(soup_product_page):
 
 # Function to return the processor model for a given product (page) as a string
 def get_product_processor_model_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Model procesoru") + td'):
@@ -308,7 +310,7 @@ def get_product_processor_model_DatArt(soup_product_page):
 
 # Function to return the number of cores for a given product (page) as a string
 def get_product_no_cores_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Počet jader") + td'):
@@ -330,7 +332,7 @@ def get_product_no_cores_DatArt(soup_product_page):
 
 # Function to return the processor frequency (in GHZ) for a given product (page) as a float number
 def get_product_processor_freq_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Frekvence procesoru") + td'):
@@ -342,7 +344,7 @@ def get_product_processor_freq_DatArt(soup_product_page):
 
 # Function to return the SIM card type for a given product (page) as a string
 def get_product_SIM_card_type_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Typ Sim karty") + td'):
@@ -357,7 +359,7 @@ def get_product_SIM_card_type_DatArt(soup_product_page):
 
 # Function to return the configuration cards for a given product (page) as a string
 def get_product_config_cards_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Konfigurace karet") + td'):
@@ -384,7 +386,7 @@ def get_product_config_cards_DatArt(soup_product_page):
 
 # Function to return the degree of protection for a given product (page) as a string
 def get_product_degree_of_protection_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Stupeň krytí") + td'):
@@ -399,7 +401,7 @@ def get_product_degree_of_protection_DatArt(soup_product_page):
 
 # Function to return the operating system for a given product (page) as a string
 def get_product_OS_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Operační systém") + td'):
@@ -414,7 +416,7 @@ def get_product_OS_DatArt(soup_product_page):
 
 # Function to return the system superstructure for a given product (page) as a string
 def get_product_system_superstructure_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Nadstavba systému") + td'):
@@ -429,7 +431,7 @@ def get_product_system_superstructure_DatArt(soup_product_page):
 
 # Function to return if the product has a notification diode for a given product (page) as a 1/0 variable
 def get_product_notification_diode_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Notifikační dioda") + td'):
@@ -444,7 +446,7 @@ def get_product_notification_diode_DatArt(soup_product_page):
 
 # Function to return the internal memory (in GB) for a given product (page) as an integer
 def get_product_int_memory_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Interní paměť") + td'):
@@ -459,7 +461,7 @@ def get_product_int_memory_DatArt(soup_product_page):
 
 # Function to return the amount of RAM (in GB) for a given product (page) as an integer
 def get_product_RAM_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Velikost paměti RAM") + td'):
@@ -471,7 +473,7 @@ def get_product_RAM_DatArt(soup_product_page):
 
 # Function to return if the product has a memory card slot for a given product (page) as a 1/0 variable
 def get_product_memory_card_slot_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Podporované paměťové karty / typ karty") + td'):
@@ -486,7 +488,7 @@ def get_product_memory_card_slot_DatArt(soup_product_page):
 
 # Function to return the maximum memory card size (in TB) for a given product (page) as an integer
 def get_product_maximum_memory_card_size_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Maximální velikost paměťové karty") + td'):
@@ -504,7 +506,7 @@ def get_product_maximum_memory_card_size_DatArt(soup_product_page):
 
 # Function to return a list of wireless technologies for a given product (page) as a list of string objects
 def get_product_wireless_tech_list_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Bezdrátové technologie") + td'):
@@ -520,7 +522,7 @@ def get_product_wireless_tech_list_DatArt(soup_product_page):
 
 # Function to return the number of rear lenses for a given product (page) as an integer
 def get_product_no_rear_cam_lenses_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Počet objektivů zadního fotoaparátu") + td'):
@@ -531,7 +533,7 @@ def get_product_no_rear_cam_lenses_DatArt(soup_product_page):
 
 # Function to return the number of front lenses for a given product (page) as an integer
 def get_product_no_front_cam_lenses_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Počet objektivů předního fotoaparátu") + td'):
@@ -542,7 +544,7 @@ def get_product_no_front_cam_lenses_DatArt(soup_product_page):
 
 # Function to return the rear camera resolution (in Megapixels) for a given product (page) as a float number
 def get_product_rear_cam_resolution_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     # Taking of highest resolution of the rear lenses as a proxy for the resolution of the rear camera in general
@@ -558,7 +560,7 @@ def get_product_rear_cam_resolution_DatArt(soup_product_page):
 
 # Function to return the front camera resolution (in Megapixels) for a given product (page) as a float number
 def get_product_front_cam_resolution_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Rozlišení předního fotoaparátu") + td'):
@@ -637,7 +639,7 @@ def get_product_camera_features_DatArt(soup_product_page):
 
 # Function to return the battery type for a given product (page) as an integer
 def get_product_battery_type_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Typ akumulátoru") + td'):
@@ -648,7 +650,7 @@ def get_product_battery_type_DatArt(soup_product_page):
 
 # Function to return the battery capacity (in mAh) for a given product (page) as an integer
 def get_product_battery_capacity_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Kapacita akumulátoru") + td'):
@@ -660,7 +662,7 @@ def get_product_battery_capacity_DatArt(soup_product_page):
 
 # Function to return a list of battery features for a given product (page) as an list of strings
 def get_product_battery_features_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Vlastnosti baterie") + td'):
@@ -698,7 +700,7 @@ def get_product_battery_features_DatArt(soup_product_page):
 
 # Function to return the charging power (in Watt) for a given product (page) as an integer
 def get_product_charging_power_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Výkon nabíjení") + td'):
@@ -710,7 +712,7 @@ def get_product_charging_power_DatArt(soup_product_page):
 
 # Function to return the securing option for a given product (page) as a string
 def get_product_security_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Zabezpečení") + td'):
@@ -743,7 +745,7 @@ def get_product_security_DatArt(soup_product_page):
 
 # Function to return the connector for a given product (page) as a string
 def get_product_connector_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Konektor") + td'):
@@ -770,7 +772,7 @@ def get_product_3_5mm_jack_DatArt(soup_product_page):
 
 # Function to return the warranty (in months) for a given product (page) as an integer
 def get_product_warranty_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Záruka") + td'):
@@ -797,7 +799,7 @@ def get_product_fm_radio_DatArt(soup_product_page):
 
 # Function to return the colour for a given product (page) as a string
 def get_product_colour_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Barva telefonu") + td'):
@@ -838,14 +840,14 @@ def get_product_colour_DatArt(soup_product_page):
         if colour == "růžová":
             colour = "pink"
         if colour not in ["blue", "turquoise", "green", "black",  "titanium", "burgundy",  "grey", "purple", "beige", "silver", "gold", "cream", "white", "red", "orange", "yellow", "pink"]:
-            colour = "Other colour"
+            colour = "other"
     else:
         colour = None
     return colour
     
 # Function to return the brand for a given product (page) as a string
 def get_product_brand_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Značky") + td'):
@@ -856,7 +858,7 @@ def get_product_brand_DatArt(soup_product_page):
 
 # Function to return the width (in cm) for a given product (page) as a float number
 def get_product_width_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     # Locating the table with product dimensions
@@ -875,7 +877,7 @@ def get_product_width_DatArt(soup_product_page):
 
 # Function to return the height (in cm) for a given product (page) as a float number
 def get_product_length_DatArt(soup_product_page):
-     # Check type of argument
+    # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
         raise TypeError(f"Input must be a BeautifulSoup object. Your input has the type: {type(soup_product_page)}.")
     # Locating the table with product dimensions
@@ -905,7 +907,6 @@ def get_product_depth_DatArt(soup_product_page):
         product_depth = None
     return product_depth
 
-# Function to return the volume (in cubic cm) for a given product (page) as a float number
 def get_product_volume_DatArt(soup_product_page):
      # Check type of argument
     if not isinstance(soup_product_page, BeautifulSoup):
@@ -927,7 +928,7 @@ def get_product_volume_DatArt(soup_product_page):
         else:
             product_depth = None
     else: 
-        product_depth
+        product_depth = None
     # Locating the table with product dimensions
     if soup_product_page.select_one('.table-borderless tr th:-soup-contains("Rozměry výrobku")'):
         if soup_product_page.select_one('.table-borderless tbody th:-soup-contains("Výška výrobku") + td'):
@@ -936,9 +937,9 @@ def get_product_volume_DatArt(soup_product_page):
         else:
             product_length = None
     else: 
-        product_length
-    if product_width*product_depth*product_length:
-        volume = product_width*product_depth*product_length
+        product_length = None
+    if product_width is not None and product_depth is not None and product_length is not None:
+        volume = product_width * product_depth * product_length
     else:
         volume = None
     return volume
@@ -1188,7 +1189,7 @@ def get_product_colour_Electroworld(soup):
             if colour == "bronzová":
                 colour = "bronze"
             if colour not in ["black", "blue", "green",  "grey", "white", "purple", "silver", "yellow", "orange", "red",  "pink", "mix",  "cream", "gold",  "beige", "turquoise", "bronze"]:
-                colour = "Other colour"
+                colour = "other"
         else:
             colour = None
         return colour
@@ -1267,7 +1268,7 @@ def get_product_volume_Electroworld(soup):
                 product_length = (float(re.search(r'(\d+)', soup_product_length).group(1)))/10
         else:
             product_length = None
-        if product_width*product_depth*product_length:
+        if product_width is not None and product_depth is not None and product_length is not None:
             volume = product_width*product_depth*product_length
         else:
             volume = None
@@ -1520,6 +1521,24 @@ def get_product_degree_of_protection_Electroworld(soup):
             degree_of_protection = str(soup.select_one('.product-parameters tbody th:-soup-contains("Stupeň krytí") + td').get_text().replace("\n", "").strip())
             if degree_of_protection == "nemá":
                 degree_of_protection = "No protection"
+            if degree_of_protection == "IP 52":
+                degree_of_protection = "IP52"
+            if degree_of_protection == "IP 53":
+                degree_of_protection = "IP53"
+            if degree_of_protection == "IP 54":
+                degree_of_protection = "IP54"
+            if degree_of_protection == "IP 58":
+                degree_of_protection = "IP58"
+            if degree_of_protection == "IP 65":
+                degree_of_protection = "IP65"
+            if degree_of_protection == "IP 67":
+                degree_of_protection = "IP67"
+            if degree_of_protection == "IP 68":
+                degree_of_protection = "IP68"
+            if degree_of_protection == "IP 69":
+                degree_of_protection = "IP69"
+            if degree_of_protection == "IP 69K":
+                degree_of_protection = "IP69K"
         else:
             degree_of_protection = "No protection"
         return degree_of_protection
@@ -2015,23 +2034,117 @@ def get_product_info_Electroworld(product_url_list):
         print(f"Product {product_number} finished")
     return products_Data
 
-# 4. Functions for merging data from multiple lists of product dictionaries
+# 4. Functions for post-processing data 
+
+# Function to add zeros for missing values of binary variables (given a list of these variables) for a list of product dictionaries and converting them into boolean data type.
+def gen_boolean_variables_data(list_of_product_dicts, binary_keys_list):
+    # Check type of arguments
+    if not isinstance(list_of_product_dicts, list):
+        raise TypeError(f"Input must be a list. Your input has the type: {type(list_of_product_dicts)}.")
+    if not isinstance(binary_keys_list, list):
+        raise TypeError(f"Input must be a list. Your input has the type: {type(binary_keys_list)}.")
+    # Iterate through each dictionary and set missing values of binary variables to zero; converting into boolean 
+    for product in list_of_product_dicts:
+        for variable in binary_keys_list:
+            product.setdefault(variable, 0)
+            if variable in product:
+                product[variable] = bool(product[variable])
+    return
+
+# Function to interchange the product width and length for products with a length below 8cm. 
+def gen_appropriate_length_and_width_DatArt(list_of_product_dicts):
+    # Check type of arguments
+    if not isinstance(list_of_product_dicts, list):
+        raise TypeError(f"Input must be a list. Your input has the type: {type(list_of_product_dicts)}.")
+    for product in list_of_product_dicts:
+        if product['length'] is not None:
+            if product['length'] < 8:
+                length_val = product['length']
+                width_val = product['width']
+                product['length'] = width_val
+                product['width'] = length_val
+    return
+
+# Function to create a CSV file for a given list of product dictionaries
+def gen_csv_file_data(csv_file_path, list_of_product_dicts):
+    # Check type of arguments
+    if not isinstance(csv_file_path, str):
+        raise TypeError(f"Input must be a string. Your input has the type: {type(csv_file_path)}.")
+    if not isinstance(list_of_product_dicts, list):
+        raise TypeError(f"Input must be a list. Your input has the type: {type(list_of_product_dicts)}.")
+    # Extract all unique keys from the JSON data
+    all_keys = set()
+    for entry in list_of_product_dicts:
+        all_keys.update(entry.keys())
+
+    # Move "ID", "online-retailer" and "title" to the front of the list of keys
+    all_keys = ['ID'] + ['online-retailer'] + ['title'] + list(all_keys - {'ID'} - {'online-retailer'} - {'title'})
+
+    # Open the CSV file for writing
+    with open(csv_file_path, 'w', newline='') as csv_file:
+        # Create a CSV writer object
+        csv_writer = csv.writer(csv_file)
+
+        # Write the header
+        csv_writer.writerow(all_keys)
+
+        # Write the data
+        for entry in list_of_product_dicts:
+            # Create a row with "ID" as the first column, "online-retailer" as the second column and "title" as the third column
+            row_data = [entry.get('ID', '')] + [entry.get('online-retailer', '')] + [entry.get('title', '')] + [entry.get(key, '') for key in all_keys[3:]]
+            csv_writer.writerow(row_data)
+    return
+
+# Function to interchange the product depth and length for products with a length below 2cm. 
+def gen_appropriate_length_and_depth_Electroworld(list_of_product_dicts):
+    # Check type of arguments
+    if not isinstance(list_of_product_dicts, list):
+        raise TypeError(f"Input must be a list. Your input has the type: {type(list_of_product_dicts)}.")
+    for product in list_of_product_dicts:
+        if product['length'] is not None:
+            if product['length'] < 8:
+                length_val = product['length']
+                depth_val = product['depth']
+                product['length'] = depth_val
+                product['depth'] = length_val
+    return
+
+# Function to remove duplicates in the list of product dictionaries of Electroworld
+def remove_duplicates_Electroworld(list_of_product_dicts):
+    # Check type of arguments
+    if not isinstance(list_of_product_dicts, list):
+        raise TypeError(f"Input must be a list. Your input has the type: {type(list_of_product_dicts)}.")
+    unique_products = []
+    seen_products = set()
+
+    for product in list_of_product_dicts:
+        # Convert the dictionary to a tuple: ID, all other keys (sorted by keys)
+        product_tuple = (product['Id'], tuple(sorted(product.items())))
+        
+        # Check if we have already seen this combination of values
+        if product_tuple not in seen_products:
+            unique_products.append(product)
+            seen_products.add(product_tuple)
+    return unique_products
+
+
+# 5. Functions for merging data from multiple lists of product dictionaries
 
 # Function to get the common keys of two lists of dictionaries 
-def get_common_variables(dataset_1, dataset_2):
+def get_common_variables(list_of_product_dicts_1, list_of_product_dicts_2):
     # Check type of arguments
-    if not isinstance(dataset_1, list):
-        raise TypeError(f"Input must be a list. Your input has the type: {type(dataset_1)}.")
-    if not isinstance(dataset_2, list):
-        raise TypeError(f"Input must be a list. Your input has the type: {type(dataset_2)}.")
+    if not isinstance(list_of_product_dicts_1, list):
+        raise TypeError(f"Input must be a list. Your input has the type: {type(list_of_product_dicts_1)}.")
+    if not isinstance(list_of_product_dicts_2, list):
+        raise TypeError(f"Input must be a list. Your input has the type: {type(list_of_product_dicts_2)}.")
     # Extracting the names of all variables from both data sets (DatArt and Electroworld). Thereby, excluding the ID variable.
-    keys_dataset_1 = set().union(*(variable.keys() - {'ID'} for variable in dataset_1))
-    keys_dataset_2 = set().union(*(variable.keys() - {'ID'} for variable in dataset_2))
+    keys_dataset_1 = set().union(*(variable.keys() - {'ID'} for variable in list_of_product_dicts_1))
+    keys_dataset_2 = set().union(*(variable.keys() - {'ID'} for variable in list_of_product_dicts_2))
     # Get the common variables
     return keys_dataset_1.intersection(keys_dataset_2)
 
 # Function to extract relevant variables from a product dictionary
-def extract_variables(product_dict, list_of_variables):
+def extract_variables_from_product_dict(product_dict, list_of_variables):
     # Check type of arguments
     if not isinstance(product_dict, dict):
         raise TypeError(f"Input must be a dictionary. Your input has the type: {type(product_dict)}.")
@@ -2095,9 +2208,54 @@ def get_online_retailer_comparison_table(data_frame):
     if not isinstance(data_frame, pd.DataFrame):
             raise TypeError(f"Input must be a pandas DataFrame. Your input has the type: {type(data_frame)}.")
     # Grouped by the online-retailer the average price, most supplied brand and the most supplied colour is calculated
-    table_retailers = data_frame.groupby('online-retailer').agg({'price': 'mean', 'brand': lambda x: x.value_counts().idxmax(), 'colour': lambda x: x.value_counts().idxmax()}).round(2)
+    table_retailers = data_frame.groupby('online-retailer').agg({'price': 'mean', 'brand': lambda x: x.value_counts().idxmax(), 'colour': lambda x: x.value_counts().idxmax(), 'rating': 'mean'}).round(2)
+    # The number of ratings are added 
+    table_retailers['number of given ratings'] = data_frame.groupby('online-retailer')['number of ratings'].sum()
     # The number of products is added to the table
-    table_retailers['number of products'] = data_frame.shape[0]
+    table_retailers['number of products'] = data_frame.groupby('online-retailer').size()
     # The columns are renamed
-    table_retailers.columns = ['Average price', 'Most supplied brand', 'Most supplied colour', 'Number of products']
+    table_retailers.columns = ['Average price', 'Most supplied brand', 'Most supplied colour', 'Average product rating', 'Number of given ratings', 'Number of products']
     return table_retailers
+
+# Function to generate a data set prepared for modelling. Boolean variables get converted to 0/1 variables, categorical variables are One-hot encoded. Also NA's are dropped
+def generate_model_dataset(data_frame, int_variables_to_exclude, float_variables_to_exclude, cat_variables_to_exclude):
+    # Check type of argument
+    if not isinstance(data_frame, pd.DataFrame):
+        raise TypeError(f"Input must be a pandas DataFrame. Your input has the type: {type(data_frame)}.")
+    if not isinstance(int_variables_to_exclude, list):
+        raise TypeError(f"Input must be a list. Your input has the type: {type(int_variables_to_exclude)}.")
+    if not isinstance(float_variables_to_exclude, list):
+        raise TypeError(f"Input must be a list. Your input has the type: {type(float_variables_to_exclude)}.")
+    if not isinstance(cat_variables_to_exclude, list):
+        raise TypeError(f"Input must be a list. Your input has the type: {type(cat_variables_to_exclude)}.")
+    # Convert boolean variables to numerical (0/1)
+    bool_variables = data_frame.select_dtypes(include=bool).astype(int) 
+    # Specify categorical variables and exclude certain variables
+    cat_variables = data_frame.select_dtypes(include=object).drop(columns=cat_variables_to_exclude)
+    # Initialize the OneHotEncoder
+    encoder = OneHotEncoder(drop='first', sparse=False)
+    # Transform the categorical variables using one-hot encoding
+    cat_variables_encoded = encoder.fit_transform(cat_variables)
+    # Get the feature names from the encoder
+    encoded_feature_names = encoder.get_feature_names_out(cat_variables.columns)
+    # Create a DataFrame with one-hot encoded categorical variables and proper column names
+    cat_variables = pd.DataFrame(cat_variables_encoded, columns=encoded_feature_names) 
+    # Specify integer variables and exclude ID column
+    int_variables = data_frame.select_dtypes(include=int).drop(columns=int_variables_to_exclude)
+    # Specify float variables
+    float_variables = data_frame.select_dtypes(include=float).drop(columns=float_variables_to_exclude)
+    # Generate one pandas DataFrame with all variables
+    final_data_frame = pd.concat([bool_variables, cat_variables, int_variables, float_variables], axis=1) 
+    return final_data_frame.dropna()
+
+# Function to save a given plot in the images folder in the current wd under a given path name
+def saving_plot(path):
+    # Check type of argument
+    if not isinstance(path, str):
+        raise TypeError(f"Input must be a string. Your input has the type: {type(path)}.")
+    # Get the current working directory
+    current_directory = os.getcwd()
+    # Locating images folder
+    images_folder = os.path.join(current_directory, "images")
+    # Saving the plots in the "images" directory
+    plt.savefig(os.path.join(images_folder, path))
