@@ -196,6 +196,7 @@ For one certain phone the total resolution contributes the most to the positive 
 
 #### GAM - SHAP Values Waterfall Distribution Plot 
 ![Graph 16](images/GAM_shap_waterfall_distr_plot.png)
+
 This beeswarm plot shows the distribution of all Shapley values for each feature across all phones. The colour further indicates the magnitude of the feature values. 
 Here, the equipment of 5G seems to have a large positive impact on all phones prices. Also, high internal memory, RAM, total resolution and display refresh rate have a relatively large positive impact in prices. The sum of the other 155 features also provides a large impact on prices in some cases. It is noticable that rather low magnitudes of features values are highlighted for this sum of impacts.
 
