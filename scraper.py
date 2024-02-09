@@ -7,6 +7,7 @@ import requests, re;
 from bs4 import BeautifulSoup;
 import csv;
 from datetime import datetime;
+import matplotlib.pyplot as plt
 import pandas as pd;
 from selenium import webdriver;
 from selenium.webdriver.common.by import By;
@@ -2081,7 +2082,7 @@ def gen_csv_file_data(csv_file_path, list_of_product_dicts):
     all_keys = ['ID'] + ['online-retailer'] + ['title'] + list(all_keys - {'ID'} - {'online-retailer'} - {'title'})
 
     # Open the CSV file for writing
-    with open(csv_file_path, 'w', newline='') as csv_file:
+    with open(csv_file_path, 'w', newline='', encoding='utf-8') as csv_file: # with open(csv_file_path, 'w', newline='') as csv_file:
         # Create a CSV writer object
         csv_writer = csv.writer(csv_file)
 
@@ -2119,7 +2120,7 @@ def remove_duplicates_Electroworld(list_of_product_dicts):
 
     for product in list_of_product_dicts:
         # Convert the dictionary to a tuple: ID, all other keys (sorted by keys)
-        product_tuple = (product['Id'], tuple(sorted(product.items())))
+        product_tuple = (product['ID'], tuple(sorted(product.items())))
         
         # Check if we have already seen this combination of values
         if product_tuple not in seen_products:
@@ -2216,6 +2217,24 @@ def get_online_retailer_comparison_table(data_frame):
     # The columns are renamed
     table_retailers.columns = ['Average price', 'Most supplied brand', 'Most supplied colour', 'Average product rating', 'Number of given ratings', 'Number of products']
     return table_retailers
+
+# Function to safe tables as png's in the "images" directory of the working directory
+def saving_table_as_png(data_frame, path):
+    # Check data types of arguments
+    if not isinstance(data_frame, pd.DataFrame):
+        raise TypeError(f"Input must be a pandas DataFrame. Your input has the type: {type(data_frame)}.")
+    if not isinstance(path, str):
+        raise TypeError(f"Input must be a string. Your input has the type: {type(path)}.")
+    # Get the current working directory
+    current_directory = os.getcwd()
+    # Define the directory path for saving images
+    images_directory = os.path.join(current_directory, 'images')
+    # Create the directory if it doesn't exist
+    os.makedirs(images_directory, exist_ok=True)
+    # Define the file path for saving the plot
+    plot_file_path = os.path.join(images_directory, path)
+    # Export the plot to the specified file path
+    dfi.export(data_frame, plot_file_path)
 
 # Function to generate a data set prepared for modelling. Boolean variables get converted to 0/1 variables, categorical variables are One-hot encoded. Also NA's are dropped
 def generate_model_dataset(data_frame, int_variables_to_exclude, float_variables_to_exclude, cat_variables_to_exclude):

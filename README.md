@@ -1,10 +1,10 @@
 # Data-Processing-Project
 
 This final project is part of the Data Processing in Python (JEM207) course at IES.
-This project is about scraping, procesing and, analysis mobile phone data, utilizing the python programming language.
-Precisely, we scrape data from three Czech online retailers using the BeautifulSoup library. During the data processing 
+This project is about scraping, processing and analyzing mobile phone data, utilizing the python programming language.
+Precisely, we scrape data from two Czech online retailers using the BeautifulSoup library. During the data processing 
 stage we try to transform data from multiple sources into a uniform format. Finally, multiple phone characteristics are 
-used to draw coclusions about the phone prices.
+used to draw conclusions about phone prices.
 
 
 
@@ -107,16 +107,14 @@ Only this file needs to be executed.
 | front cam | boolean | ❌ | ✅ |
 | wireless charging performance | integer (Watt) | ❌ | ✅ |
 
-### Data Analysis
+### Data Analysis - Summary Statistics and Visualizations
 The main focus lies on the price variable. For simple analysis some typical summary statistics were calculated for the price variable and some other interesting characteristics. The complete data set, consisting of data from two sources DatArt and Electroworld, contains 1687 rows and 48 variables. 
 The prices of mobile phones vary between 449 and 53990 crowns with a mean 12140,03 crowns, giving a first hint for right-skewness (see table below). Most metric variables contain less than 100 NA's and therefore serves as variables for price modelling. An exception is the variable rating with more than 500 NA's. 
 #### Graph 1
 ![Graph 1](images/metric_variables_table.png)
 
-This is a description of Graph 1.
-
 #### Graph 2
-![Graph 2](images/online_retailer_table.png)
+![Graph 2](images/online-retailer_table.png)
 
 In total there are 950 (736) products included from DatArt (Electroworld). 
 
@@ -126,62 +124,105 @@ In total there are 950 (736) products included from DatArt (Electroworld).
 Most of the products belong to Apple (19%) followed by Samsung (17,7%) and Xiaomi (13,5%).
 
 #### Graph 4
-![Graph 4](images/online_retailer_comp.png)
+![Graph 4](images/processor_table.png)
+
+The processors of the products were mostly manufacturer by Mediathek (24,4%) and Apple (19,2%).
+
+#### Graph 5
+![Graph 5](images/online_retailer_comp.png)
 
 Some grouped metrics were calculated for the retailers. The average price of mobile phones does not vary much between the two retailers and lies around 12000 crowns. Further, the company with the most supplied products on the websites is apple in both cases. The most supplied colour of a phone is black in both cases. However, the number of ratings is much higher for DatArt (20058) than for Electroworld (1816), given a hint that the first website is used more often for buying phones.
 
-#### Graph 5
-![Graph 5](images/bar_plots_grouped.png)
-
-The brands are allocated quite similar for both websites. However, Electroworld supplies Samsung more often than Xiaomi phones compared to DatArt. The colours and degrees of protection are also allocated quite equally. DatArt offers many products with a processor manufacturered by Qualcomm and Electroworld by Mediathek Helio. For this variable noticable differences can be found.
-
 #### Graph 6
-![Graph 6](images/pie_plots.png)
+![Graph 6](images/bar_plots_grouped.png)
+
+The brands are allocated quite similar for both websites. However, Electroworld supplies Samsung more often than Xiaomi phones compared to DatArt. The colours are also allocated quite equally. 
+
+#### Graph 7
+![Graph 7](images/pie_plots.png)
 
 More than half of all products include no wireless charging (64,6%) and the most supplied connector for phones is USB-c (75,4%).
 
-#### Graph 7
-![Graph 7](images/scatter_plots_brand)
+#### Graph 8
+![Graph 8](images/scatter_plots_retailer.png)
 
 Prices seem to have a slight positive association with the rear cam resolution. However, there are also some products with a very high rear cam resolution but a more average price. In this association there seems to be no big difference between the two websites. The volume of a product seems to have almost no influence on prices. It is comparably low for high and low price phones.
 
-#### Graph 8
-![Graph 8](images/scatter_plots_brand.png.png)
-
-There seems to be a positive relationship between prices and display size. 
-Also between the variables resolution (resolution width x resolution height) and price seems to be a positive relationship.
-
 #### Graph 9
-![Graph 9](images/pie_plots.png)
+![Graph 9](images/scatter_plots_brand.png)
 
-This is a description of Graph 9.
+There seems to be a positive relationship between prices and display size. Samsung products seem to have higher display sizes on average compared to Apple and Xiaomi products. Xiaomi products have many display sizes around the average not showing any relationship, while maintaining comparably low prices.
+Also between the variables resolution (resolution width x resolution height) and price seems to be a positive relationship. This seems to be the case for all three brands.
 
 #### Graph 10
-![Graph 10](images/pie_plots.png)
+![Graph 10](images/histogram_grouped_brand.png)
 
-This is a description of Graph 10.
+The prices are normally distributed for Xiaomi products and right-skewed for Apple and Samsung products.
 
 #### Graph 11
-![Graph 11](images/pie_plots.png)
+![Graph 11](images/histogram_grouped_retailer.png)
 
-This is a description of Graph 11.
+For both online-retailers the prices are right-skewed.
 
 #### Graph 12
-![Graph 12](images/pie_plots.png)
+![Graph 12](images/heatmap_corr.png)
 
-This is a description of Graph 12.
+Some logical high correlations exist between the resolution width, resolution height and resolution total and the between the physical measures (length, width, depth, weight and volume). The price variable has a noticable high positive correlation with the total resolution, internal memory and the RAM.
+
+### Data Analysis - Modelling
+First, a Generalized Additive Model was estimated using InterpretMLs explainable boosting machines. For this type of model the Shapley values can be estimated. For all features their sum can be interpeted as the difference between the baseline (expected) model output and the current model output for a certain prediction point. Therefore, they have an additive nature and each features contribution to the overall difference between expectation and model output can be interpred quantitatively.
+For the analysis some variables showing a clear behaviour of multicollinearity were removed (resolution width and resolution height). Some other variables containing too many categories or NA's were also removed (rating, number or ratings, configuration cards, title, processor model). 
+Further, the logarithm was applied to the dependent variable to obtain normally distributed prices. 
 
 #### Graph 13
-![Graph 13](images/pie_plots.png)
+![Graph 13](images/GAM_partial_dep_plot.png)
 
-This is a description of Graph 13.
+For this GAM, the Shapley value can be directly seen as the difference between the blue (model) line and the expected model output is represented by the horizontal grey dotted line. The vertical grey dotted line represents the average value of the shown regressors and its distribution is plotted too. Here, total resolution seems to have a high positive impact on prices when the variable value increases. This effect seems linear. For the shown data point the variable seems to have a strong positive impact on its price.
+
+In the following plot the Shapley values are plotted. For some variables only a few points seem to be plotted as many points overlap.
+
 
 #### Graph 14
-![Graph 14](images/pie_plots.png)
-
-This is a description of Graph 14.
+![Graph 14](images/GAM_shap_scatter_plot_resolution_total.png)
 
 #### Graph 15
-![Graph 15](images/pie_plots.png)
+![Graph 15](images/GAM_shap_waterfall_plot.png)
 
-This is a description of Graph 15.
+For one certain phone the total resolution contributes the most to the positive deviation from the expected model output for this observation. Also many other variables show a similar impact, e.g. internal memory of 512GB, 5G equipment, front cam resolution of 12mp. The other 155 features sum up to a value of only 0.13 here. This clearly shows that the price of a phone is a composition of many components and only some of them seem to have a relatively larger impact on prices.
+
+#### Graph 16
+![Graph 16](images/GAM_shap_waterfall_distr_plot.png)
+This beeswarm plot shows the distribution of all Shapley values for each feature across all phones. The colour further indicates the magnitude of the feature values. 
+Here, 5G seems to have a large positive impact on all phones prices. Also, the high internal memory, RAM, total resolution and display refresh rate have a relatively large positive impact in prices. The sum of the other 155 features also provides a large impact on prices in some cases, thereby rather low magnitudes of features values are highlighted.
+
+#### Graph 17
+![Graph 17](images/GAM_shap_waterfall_mean_plot.png)
+This plot shows the means of the absolute Shapley values for the features across data points. Here, the same variables as before show a significant positive impact on prices. In the next plot the distribution of these values is plotted across data points.
+
+#### Graph 18
+![Graph 18](images/GAM_shap_waterfall_abs_plot.png)
+
+Here the variables mentioned before show large impacts on the price variables. But also the sum of all other variables shows a very high impact in many cases. 
+
+In the next step, a non-additive boosted tree model is applied for comparison. The same plots can be used for the interpretation of effects.
+
+#### Graph 19
+![Graph 19](images/Non_Add_Boosted_Tree_Model_part_dep_plot.png)
+
+Compared to the same plot above resulting from the GAM the total resolution shows a similar positive impact on prices, increasing with the magnitude of the variable. 
+
+#### Graph 20
+![Graph 20](images/Non_Add_Boosted_Tree_Model_shap_resolution_total.png)
+In this model the total resolution of a phone again shows a very linear and large positive impact on prices for increasing resolutions. Further the data points are highlighted. Here, it can be seen that phone products with a relatively low total resolution does not support 5G. On the other hand, rare (high end) products equipped with very high total resolution almost always also support 5G. 
+
+#### Graph 21
+![Graph 21](images/Non_Add_Boosted_Tree_Model_shap_waterfall_distr.png)
+In the beeswarm plot it can be seen that similar variables compared to the GAM seem to have a large impact on phone prices. For increasing feature values 5G, the display refresh rate, the internal memory and the total resolution have a large positive on phone prices. On the other hand, phones that not include a memory card slot seem to have higher prices compared to products including one. This can be due to relatively expensive Apple products that are not equipped with a memory card slot. The same holds for the existence of a 3.5mm jack support. Also the IPX8 degree or protection seems to have a positive impact in prices. With a closer look only expensive products are equipped with this protection.
+
+#### Graph 22
+![Graph 22](images/Non_Add_Boosted_Tree_Model_shap_waterfall_abs_distr.png)
+The same variables can be investigated with the beeswarm plot of the absolute Shapley values again.
+
+#### Graph 23
+![Graph 23](images/Non_Add_Boosted_Tree_Model_shap_waterfall_mean.png)
+Finally, the mean of the Shapley values can be investigated. Here, the display refresh rate, internal memory, total resolution, 5G and memory card slot have the largest impact on phone prices. The other 145 features also sum up to a large impact for every product. However, the internal memory and the refresh rate together have already a larger impact on prices compared to the other 145 features on average.

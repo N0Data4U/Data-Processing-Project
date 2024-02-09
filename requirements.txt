@@ -6,6 +6,7 @@ python_version >= '3.11.5'
 
 # Packages
 beautifulsoup4==4.12.2
+dataframe-image==0.2.3
 datasets==2.16.1
 DateTime==5.4
 interpret==0.5.0
